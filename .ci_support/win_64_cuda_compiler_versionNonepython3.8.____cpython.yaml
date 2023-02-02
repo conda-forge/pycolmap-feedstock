@@ -1,0 +1,42 @@
+boost_cpp:
+- 1.78.0
+c_compiler:
+- vs2019
+channel_sources:
+- conda-forge
+channel_targets:
+- conda-forge main
+cuda_compiler:
+- nvcc
+cuda_compiler_version:
+- None
+cxx_compiler:
+- vs2019
+flann:
+- 1.9.1
+gflags:
+- '2.2'
+glew:
+- '2.1'
+glog:
+- '0.6'
+libblas:
+- 3.9 *netlib
+libcblas:
+- 3.9 *netlib
+metis:
+- '5.1'
+pin_run_as_build:
+  boost-cpp:
+    max_pin: x.x.x
+  flann:
+    max_pin: x.x.x
+  python:
+    min_pin: x.x
+    max_pin: x.x
+python:
+- 3.8.* *_cpython
+sqlite:
+- '3'
+target_platform:
+- win-64
