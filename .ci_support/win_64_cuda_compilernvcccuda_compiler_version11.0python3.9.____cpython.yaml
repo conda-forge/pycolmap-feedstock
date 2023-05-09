@@ -9,7 +9,7 @@ channel_targets:
 cuda_compiler:
 - nvcc
 cuda_compiler_version:
-- '10.2'
+- '11.0'
 cxx_compiler:
 - vs2019
 flann:
@@ -42,3 +42,6 @@ sqlite:
 - '3'
 target_platform:
 - win-64
+zip_keys:
+- - cuda_compiler
+  - cuda_compiler_version

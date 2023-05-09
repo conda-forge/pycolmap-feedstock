@@ -7,9 +7,9 @@ channel_sources:
 channel_targets:
 - conda-forge main
 cuda_compiler:
-- nvcc
+- None
 cuda_compiler_version:
-- '10.2'
+- None
 cxx_compiler:
 - vs2019
 flann:
@@ -42,3 +42,6 @@ sqlite:
 - '3'
 target_platform:
 - win-64
+zip_keys:
+- - cuda_compiler
+  - cuda_compiler_version
