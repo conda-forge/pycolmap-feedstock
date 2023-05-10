@@ -11,7 +11,6 @@ source:
     patches:
       - use-conda-pybind11.patch
       - fix-win-build.patch
-      - 68_91.patch
 
 build:
   number: 0
