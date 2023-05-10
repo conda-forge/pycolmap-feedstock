@@ -67,6 +67,7 @@ requirements:
     - vlfeat                                 # [unix]
     - gmp                                    # [unix]
     - qt-main
+    - mpir                                   # [win]
   run:
     - python
     - boost-cpp
