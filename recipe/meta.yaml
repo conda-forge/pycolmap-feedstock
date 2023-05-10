@@ -1,5 +1,5 @@
 {% set name = "pycolmap" %}
-{% set version = "0.3.0" %}
+{% set version = "0.4.0" %}
 
 package:
   name: {{ name }}
@@ -7,14 +7,13 @@ package:
 
 source:
   - url: https://github.com/colmap/{{ name }}/archive/v{{ version }}.tar.gz
-    sha256: e3322e692470535c8d59b758ef073e6cfaf8a8262494393cdc8ba27f309c3d94
+    sha256: cead12638a9746143143ba29a5cb6131a34d6e9555ade9c9d1b79b8eacfbf9cf
     patches:
       - use-conda-pybind11.patch
       - fix-win-build.patch
-      - 68_91.patch
 
 build:
-  number: 1
+  number: 0
   script: {{ PYTHON }} -m pip install . -vv
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version not in (undefined, "None")]
   string: cpu_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version in (undefined, "None")]
@@ -68,6 +67,7 @@ requirements:
     - vlfeat                                 # [unix]
     - gmp                                    # [unix]
     - qt-main
+    - mpir                                   # [win]
   run:
     - python
     - boost-cpp
