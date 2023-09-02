@@ -9,7 +9,7 @@ channel_targets:
 cuda_compiler:
 - nvcc
 cuda_compiler_version:
-- '11.0'
+- '11.8'
 cxx_compiler:
 - vs2019
 flann:
@@ -35,7 +35,7 @@ pin_run_as_build:
     min_pin: x.x
     max_pin: x.x
 python:
-- 3.10.* *_cpython
+- 3.9.* *_cpython
 qt_main:
 - '5.15'
 sqlite:
