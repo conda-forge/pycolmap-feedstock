@@ -9,6 +9,7 @@ source:
   - url: https://github.com/colmap/{{ name }}/archive/v{{ version }}.tar.gz
     sha256: cead12638a9746143143ba29a5cb6131a34d6e9555ade9c9d1b79b8eacfbf9cf
     patches:
+      - use-cmake-args.patch
       - use-conda-pybind11.patch
       - fix-win-build.patch
       - fix-find-package-cuda.patch
