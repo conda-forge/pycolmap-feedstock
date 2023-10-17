@@ -1,0 +1,49 @@
+diff --git a/reconstruction/camera.cc b/reconstruction/camera.cc
+index 8c91fbe..e84bdf8 100644
+--- a/reconstruction/camera.cc
++++ b/reconstruction/camera.cc
+@@ -33,7 +33,10 @@ std::string PrintCamera(const colmap::Camera& camera) {
+ void init_camera(py::module& m) {
+     using CameraMap = EIGEN_STL_UMAP(colmap::camera_t, colmap::Camera);
+ 
+-    py::bind_map<CameraMap>(m, "MapCameraIdCamera").def("__repr__", [](const CameraMap& self) {
++    py::class_<CameraMap::key_type>(m, "CameraKeyType");
++    py::class_<CameraMap::mapped_type>(m, "CameraValueType");
++
++    py::bind_map<CameraMap, CameraMap::key_type, CameraMap::mapped_type>(m, "MapCameraIdCamera").def("__repr__", [](const CameraMap& self) {
+         std::string repr = "{";
+         bool is_first = true;
+         for (auto& pair : self) {
+diff --git a/reconstruction/image.cc b/reconstruction/image.cc
+index 7c00fae..4ded45d 100644
+--- a/reconstruction/image.cc
++++ b/reconstruction/image.cc
+@@ -33,7 +33,11 @@ std::string PrintImage(const colmap::Image& image) {
+ 
+ void init_image(py::module& m) {
+     using ImageMap = EIGEN_STL_UMAP(colmap::image_t, colmap::Image);
+-    py::bind_map<ImageMap>(m, "MapImageIdImage").def("__repr__", [](const ImageMap& self) {
++
++    py::class_<ImageMap::key_type>(m, "ImageKeyType");
++    py::class_<ImageMap::mapped_type>(m, "ImageValueType");
++
++    py::bind_map<ImageMap, ImageMap::key_type, ImageMap::mapped_type>(m, "MapImageIdImage").def("__repr__", [](const ImageMap& self) {
+         std::string repr = "{";
+         bool is_first = true;
+         for (auto& pair : self) {
+diff --git a/reconstruction/point3D.cc b/reconstruction/point3D.cc
+index d4cc396..22e9450 100644
+--- a/reconstruction/point3D.cc
++++ b/reconstruction/point3D.cc
+@@ -31,7 +31,10 @@ std::string PrintPoint3D(const colmap::Point3D& point3D) {
+ void init_point3D(py::module& m) {
+     using Point3DMap = EIGEN_STL_UMAP(colmap::point3D_t, colmap::Point3D);
+ 
+-    py::bind_map<Point3DMap>(m, "MapPoint3DIdPoint3D").def("__repr__", [](const Point3DMap& self) {
++    py::class_<Point3DMap::key_type>(m, "Point3DKeyType");
++    py::class_<Point3DMap::mapped_type>(m, "Point3DValueType");
++
++    py::bind_map<Point3DMap, Point3DMap::key_type, Point3DMap::mapped_type>(m, "MapPoint3DIdPoint3D").def("__repr__", [](const Point3DMap& self) {
+         std::string repr = "{";
+         bool is_first = true;
+         for (auto& pair : self) {
