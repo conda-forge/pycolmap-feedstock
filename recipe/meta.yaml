@@ -12,6 +12,7 @@ source:
       - use-conda-pybind11.patch
       - fix-win-build.patch
       - fix-pybind11.patch
+      - fix-cuda-link.patch
 
 build:
   number: 3
