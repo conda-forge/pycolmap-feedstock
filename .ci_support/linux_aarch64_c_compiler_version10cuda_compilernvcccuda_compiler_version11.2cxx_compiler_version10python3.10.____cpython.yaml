@@ -1,15 +1,27 @@
+BUILD:
+- aarch64-conda_cos7-linux-gnu
 c_compiler:
-- vs2019
+- gcc
+c_compiler_version:
+- '10'
+cdt_arch:
+- aarch64
+cdt_name:
+- cos7
 channel_sources:
 - conda-forge
 channel_targets:
 - conda-forge main
 cuda_compiler:
-- None
+- nvcc
 cuda_compiler_version:
-- None
+- '11.2'
 cxx_compiler:
-- vs2019
+- gxx
+cxx_compiler_version:
+- '10'
+docker_image:
+- quay.io/condaforge/linux-anvil-cuda:11.2
 flann:
 - 1.9.2
 gflags:
@@ -18,6 +30,8 @@ glew:
 - '2.1'
 glog:
 - '0.6'
+gmp:
+- '6'
 libblas:
 - 3.9 *netlib
 libboost_devel:
@@ -32,6 +46,8 @@ pin_run_as_build:
   python:
     min_pin: x.x
     max_pin: x.x
+  vlfeat:
+    max_pin: x.x.x
 python:
 - 3.10.* *_cpython
 qt_main:
@@ -39,7 +55,13 @@ qt_main:
 sqlite:
 - '3'
 target_platform:
-- win-64
+- linux-aarch64
+vlfeat:
+- 0.9.21
 zip_keys:
-- - cuda_compiler
+- - c_compiler_version
+  - cxx_compiler_version
+  - cuda_compiler
   - cuda_compiler_version
+  - cdt_name
+  - docker_image

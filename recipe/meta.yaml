@@ -11,9 +11,11 @@ source:
     patches:
       - use-conda-pybind11.patch
       - fix-win-build.patch
+      - fix-pybind11.patch
+      - fix-cuda-link.patch
 
 build:
-  number: 2
+  number: 3
   script: {{ PYTHON }} -m pip install . -vv
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version not in (undefined, "None")]
   string: cpu_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version in (undefined, "None")]
@@ -49,8 +51,8 @@ requirements:
   host:
     - pip
     - python
-    - pybind11 2.9
-    - boost-cpp
+    - pybind11
+    - libboost-devel
     - colmap
     - libblas
     - libcblas
@@ -68,13 +70,13 @@ requirements:
     - gmp                                    # [unix]
     - qt-main
     - mpir                                   # [win]
+    - cuda-cudart-dev                        # [(cuda_compiler_version or "").startswith("12")]
   run:
     - python
-    - boost-cpp
     - flann
     - vlfeat
     - numpy
-    - __cuda >={{ cuda_compiler_version }}  # [cuda_compiler_version not in (undefined, "None")]
+    - __cuda >={{ cuda_compiler_version }}   # [cuda_compiler_version not in (undefined, "None")]
 
 test:
   imports:
