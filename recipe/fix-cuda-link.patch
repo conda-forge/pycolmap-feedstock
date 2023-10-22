@@ -11,5 +11,5 @@ index 9b45a9f..004ee8b 100644
 +endif()
 +
 +if (${COLMAP_CUDA_ENABLED})
-+  target_link_libraries(pycolmap PRIVATE CUDA::cudart CUDA::curand)
++  target_link_libraries(pycolmap PRIVATE CUDA::cudart)
 +endif()
