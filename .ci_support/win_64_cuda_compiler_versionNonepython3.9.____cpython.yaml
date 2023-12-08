@@ -5,9 +5,9 @@ channel_sources:
 channel_targets:
 - conda-forge main
 cuda_compiler:
-- nvcc
+- None
 cuda_compiler_version:
-- '11.8'
+- None
 cxx_compiler:
 - vs2019
 flann:
@@ -25,7 +25,7 @@ libboost_devel:
 libcblas:
 - 3.9 *netlib
 metis:
-- '5.1'
+- 5.1.1
 pin_run_as_build:
   flann:
     max_pin: x.x.x
@@ -33,7 +33,7 @@ pin_run_as_build:
     min_pin: x.x
     max_pin: x.x
 python:
-- 3.8.* *_cpython
+- 3.9.* *_cpython
 qt_main:
 - '5.15'
 sqlite:
