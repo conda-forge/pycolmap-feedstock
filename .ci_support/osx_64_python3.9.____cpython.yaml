@@ -5,9 +5,9 @@ c_compiler:
 c_compiler_version:
 - '16'
 channel_sources:
-- conda-forge
+- conda-forge/label/colmap_dev,conda-forge
 channel_targets:
-- conda-forge main
+- conda-forge pycolmap_dev
 cuda_compiler_version:
 - None
 cxx_compiler:
