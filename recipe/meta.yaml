@@ -1,5 +1,5 @@
 {% set name = "pycolmap" %}
-{% set version = "0.5.0.20231215-dev" %}
+{% set version = "0.5.0.2023.12.15" %}
 {% set commit_sha = "80d3129c215079703667cf307c452d3f32adc5c2" %} 
 
 package:
