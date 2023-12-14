@@ -31,6 +31,7 @@ requirements:
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
     - pybind11                               # [build_platform != target_platform]
     - scikit-build                           # [build_platform != target_platform]
+    - scikit-build-core                      # [build_platform != target_platform]
     # x11 stuff
     - {{ cdt('mesa-libgl-devel') }}          # [unix and not arm64]
     - {{ cdt('mesa-dri-drivers') }}          # [unix and not arm64]
@@ -49,6 +50,7 @@ requirements:
     - pip
     - python
     - scikit-build
+    - scikit-build-core
     - pybind11
     - libboost-devel
     - colmap
