@@ -70,7 +70,7 @@ requirements:
     - gmp                                    # [unix]
     - qt-main
     - mpir                                   # [win]
-    - cuda-cudart-dev                        # [(cuda_compiler_version or "").startswith("12")]
+    - cuda-cudart-dev {{ cuda_compiler_version }}  # [(cuda_compiler_version or "").startswith("12")]
   run:
     - python
     - flann
