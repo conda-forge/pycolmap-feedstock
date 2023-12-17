@@ -1,0 +1,10 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index cc4b063..248166d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -12,4 +12,5 @@ pybind11_add_module(pycolmap pycolmap/main.cc)
+ target_include_directories(pycolmap PRIVATE ${PROJECT_SOURCE_DIR})
+ target_link_libraries(pycolmap PRIVATE colmap::colmap freeimage::FreeImage)
+ target_compile_definitions(pycolmap PRIVATE VERSION_INFO="${PROJECT_VERSION}")
++target_compile_definitions(pycolmap PRIVATE NOMINMAX)
+ install(TARGETS pycolmap LIBRARY DESTINATION .)
