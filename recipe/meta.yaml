@@ -9,6 +9,8 @@ package:
 source:
   - url: https://github.com/colmap/{{ name }}/archive/{{ commit_sha }}.tar.gz
     sha256: a786e9d4cbd4254f35d0d877b89a225e160d97a17571e0f9c32e9f2f0eae8757
+    patches:
+      - win-no-min-max.patch
 
 build:
   number: 0
