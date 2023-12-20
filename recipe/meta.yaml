@@ -11,7 +11,7 @@ source:
     sha256: 0fa8b72e54825a113aed4ea9ad67ab50e80851645c81be5672ff2123e4fa4e76
     patches:
       - 214.patch
-      - always-use-cuda.patch  # win and cuda_compiler_version not in (undefined, "None")
+      - always-use-cuda.patch  # [win and cuda_compiler_version not in (undefined, "None")]
 
 build:
   number: 0
