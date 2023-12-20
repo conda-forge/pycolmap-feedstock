@@ -1,6 +1,6 @@
 {% set name = "pycolmap" %}
-{% set version = "0.5.0.2023.12.15" %}
-{% set commit_sha = "80d3129c215079703667cf307c452d3f32adc5c2" %} 
+{% set version = "0.5.0.2023.12.20" %}
+{% set commit_sha = "bb1732139c800ddf5336bdfc9e5e24053351d47d" %} 
 
 package:
   name: {{ name }}
@@ -56,7 +56,8 @@ requirements:
     - scikit-build-core
     - pybind11
     - libboost-devel
-    - colmap
+    - colmap 3.9*=gpu*  # [cuda_compiler_version not in (undefined, "None")]
+    - colmap 3.9*=cpu*  # [cuda_compiler_version in (undefined, "None")]
     - libblas
     - libcblas
     - cgal-cpp
