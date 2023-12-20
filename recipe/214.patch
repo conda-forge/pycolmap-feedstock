@@ -23,725 +23,75 @@ index f3c6769..9a22ff3 100644
      steps:
        - uses: actions/checkout@v4
        - name: Build wheels
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index cc4b063..d8a2ce2 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -2,6 +2,18 @@ cmake_minimum_required(VERSION 3.10)
+ project(${SKBUILD_PROJECT_NAME} VERSION ${SKBUILD_PROJECT_VERSION})
+ 
+ set(CMAKE_CUDA_ARCHITECTURES "native")
++if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
++    # Some fixes for the Glog library.
++    add_definitions("-DGLOG_NO_ABBREVIATED_SEVERITIES")
++    add_definitions("-DGL_GLEXT_PROTOTYPES")
++    add_definitions("-DNOMINMAX")
++    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
++    # Enable object level parallel builds in Visual Studio.
++    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MP")
++    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
++endif()
++
++
+ find_package(colmap 3.9 REQUIRED)
+ 
+ find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
+@@ -10,6 +22,6 @@ find_package(pybind11 REQUIRED)
+ 
+ pybind11_add_module(pycolmap pycolmap/main.cc)
+ target_include_directories(pycolmap PRIVATE ${PROJECT_SOURCE_DIR})
+-target_link_libraries(pycolmap PRIVATE colmap::colmap freeimage::FreeImage)
++target_link_libraries(pycolmap PRIVATE colmap::colmap freeimage::FreeImage glog::glog)
+ target_compile_definitions(pycolmap PRIVATE VERSION_INFO="${PROJECT_VERSION}")
+ install(TARGETS pycolmap LIBRARY DESTINATION .)
 diff --git a/package/install-colmap-windows.ps1 b/package/install-colmap-windows.ps1
 new file mode 100755
-index 0000000..ece11f4
+index 0000000..f457fce
 --- /dev/null
 +++ b/package/install-colmap-windows.ps1
-@@ -0,0 +1,24 @@
-+CURRDIR = $PWD
+@@ -0,0 +1,32 @@
++$CURRDIR = $PWD
 +
-+${VCPKG_INSTALLATION_ROOT}/vcpkg.exe integrate install
-+
-+curl -L -o ninja.zip https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
-+Expand-Archive -LiteralPath ${CURRDIR}/ninja.zip -DestinationPath ${CURRDIR}
-+NINJA_PATH = "${CURRDIR}/ninja.exe"
++curl.exe -L -o "ninja.zip" "https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip"
++Expand-Archive -LiteralPath "${CURRDIR}/ninja.zip" -DestinationPath ${CURRDIR}
++$NINJA_PATH = "${CURRDIR}/ninja.exe"
 +
 +cd ${CURRDIR}
 +git clone https://github.com/colmap/colmap.git
 +cd colmap
 +git checkout c0355417328f3706a30a9265fd52bc7a5aa4cb8c
 +
-+${VCPKG_INSTALLATION_ROOT}/vcpkg.exe install --recurse @./.azure-pipelines/build-windows-vcpkg.txt --clean-after-build
++& "./scripts/shell/enter_vs_dev_shell.ps1"
++
++[System.Collections.ArrayList]$DEPS = Get-Content -Path ".azure-pipelines/build-windows-vcpkg.txt"
++$DEPS.Remove("cgal")
++$DEPS.Remove("qt5-base")
++$DEPS.Add("boost-heap")
++& "${env:VCPKG_INSTALLATION_ROOT}/vcpkg.exe" install --recurse --clean-after-build @DEPS
++& "${env:VCPKG_INSTALLATION_ROOT}/vcpkg.exe" integrate install
 +
 +mkdir build
 +cd build
 +cmake .. `
 +  -GNinja `
-+  -DCMAKE_MAKE_PROGRAM=${NINJA_PATH} `
-+  -DCMAKE_BUILD_TYPE=Release `
-+  -DCMAKE_TOOLCHAIN_FILE=${VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake `
-+  -DVCPKG_TARGET_TRIPLET=x64-windows
-+${NINJA_PATH} install
-diff --git a/pyproject.toml b/pyproject.toml
-index 4467d12..a631c3b 100644
---- a/pyproject.toml
-+++ b/pyproject.toml
-@@ -36,6 +36,5 @@ test-command = "python -c 'import pycolmap; print(pycolmap.__version__)'"
- before-all = "./package/install-colmap-centos.sh"
- config-settings = "cmake.define.EIGEN3_INCLUDE_DIRS=eigen"
- 
--[tool.cibuildwheel.macos]
--before-all = "./package/install-colmap-macos.sh"
--config-settings = { "cmake.define.BOOSTROOT" = "boost_install", "cmake.define.Boost_NO_SYSTEM_PATHS" = "ON" }
-+[tool.cibuildwheel.windows]
-+before-all = "./package/install-colmap-windows.ps1"
-
-From 09057c57a262f17f27fdc8bcd86960785c091e83 Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Mon, 18 Dec 2023 11:30:16 +0100
-Subject: [PATCH 02/32] Add win to pyproject.toml
-
----
- pyproject.toml | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/pyproject.toml b/pyproject.toml
-index a631c3b..49a1202 100644
---- a/pyproject.toml
-+++ b/pyproject.toml
-@@ -28,7 +28,7 @@ wheel.expand-macos-universal-tags = true
- 
- 
- [tool.cibuildwheel]
--build = "cp3{8,9,10,11}-{macosx,manylinux}*"
-+build = "cp3{8,9,10,11}-{macosx,manylinux,win}*"
- archs = ["auto64"]
- test-command = "python -c 'import pycolmap; print(pycolmap.__version__)'"
- 
-
-From d935d6e62ed2d80a33f2c6d277f2753acbeb75da Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Mon, 18 Dec 2023 11:31:35 +0100
-Subject: [PATCH 03/32] Recover macos config
-
----
- pyproject.toml | 4 ++++
- 1 file changed, 4 insertions(+)
-
-diff --git a/pyproject.toml b/pyproject.toml
-index 49a1202..6950564 100644
---- a/pyproject.toml
-+++ b/pyproject.toml
-@@ -36,5 +36,9 @@ test-command = "python -c 'import pycolmap; print(pycolmap.__version__)'"
- before-all = "./package/install-colmap-centos.sh"
- config-settings = "cmake.define.EIGEN3_INCLUDE_DIRS=eigen"
- 
-+[tool.cibuildwheel.macos]
-+before-all = "./package/install-colmap-macos.sh"
-+config-settings = { "cmake.define.BOOSTROOT" = "boost_install", "cmake.define.Boost_NO_SYSTEM_PATHS" = "ON" }
-+
- [tool.cibuildwheel.windows]
- before-all = "./package/install-colmap-windows.ps1"
-
-From 26bfa88a0e9081a3b98aaf6bba5c9c78016ba0bb Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Mon, 18 Dec 2023 11:34:22 +0100
-Subject: [PATCH 04/32] Fix
-
----
- pyproject.toml | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/pyproject.toml b/pyproject.toml
-index 6950564..8746102 100644
---- a/pyproject.toml
-+++ b/pyproject.toml
-@@ -41,4 +41,4 @@ before-all = "./package/install-colmap-macos.sh"
- config-settings = { "cmake.define.BOOSTROOT" = "boost_install", "cmake.define.Boost_NO_SYSTEM_PATHS" = "ON" }
- 
- [tool.cibuildwheel.windows]
--before-all = "./package/install-colmap-windows.ps1"
-+before-all = "package/install-colmap-windows.ps1"
-
-From d7992b7398a1903de841811c3da66cebf1c7bbca Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Mon, 18 Dec 2023 11:41:43 +0100
-Subject: [PATCH 05/32] Add {project} prefix
-
----
- pyproject.toml | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
-
-diff --git a/pyproject.toml b/pyproject.toml
-index 8746102..ae2cb77 100644
---- a/pyproject.toml
-+++ b/pyproject.toml
-@@ -33,12 +33,12 @@ archs = ["auto64"]
- test-command = "python -c 'import pycolmap; print(pycolmap.__version__)'"
- 
- [tool.cibuildwheel.linux]
--before-all = "./package/install-colmap-centos.sh"
-+before-all = "{project}/package/install-colmap-centos.sh"
- config-settings = "cmake.define.EIGEN3_INCLUDE_DIRS=eigen"
- 
- [tool.cibuildwheel.macos]
--before-all = "./package/install-colmap-macos.sh"
-+before-all = "{project}/package/install-colmap-macos.sh"
- config-settings = { "cmake.define.BOOSTROOT" = "boost_install", "cmake.define.Boost_NO_SYSTEM_PATHS" = "ON" }
- 
- [tool.cibuildwheel.windows]
--before-all = "package/install-colmap-windows.ps1"
-+before-all = "{project}/package/install-colmap-windows.ps1"
-
-From d501e5452901deefb9ee0fcfa3b5369fbca6ea8c Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Mon, 18 Dec 2023 11:48:52 +0100
-Subject: [PATCH 06/32] Try backslash
-
----
- pyproject.toml | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/pyproject.toml b/pyproject.toml
-index ae2cb77..6733de6 100644
---- a/pyproject.toml
-+++ b/pyproject.toml
-@@ -41,4 +41,4 @@ before-all = "{project}/package/install-colmap-macos.sh"
- config-settings = { "cmake.define.BOOSTROOT" = "boost_install", "cmake.define.Boost_NO_SYSTEM_PATHS" = "ON" }
- 
- [tool.cibuildwheel.windows]
--before-all = "{project}/package/install-colmap-windows.ps1"
-+before-all = "{project}\package\install-colmap-windows.ps1"
-
-From 4e36c50f7506d2ad680f4e7a2cd47b6c4c6b513d Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Mon, 18 Dec 2023 12:00:37 +0100
-Subject: [PATCH 07/32] Powershell syntax?
-
----
- pyproject.toml | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/pyproject.toml b/pyproject.toml
-index 6733de6..ba5d58e 100644
---- a/pyproject.toml
-+++ b/pyproject.toml
-@@ -41,4 +41,4 @@ before-all = "{project}/package/install-colmap-macos.sh"
- config-settings = { "cmake.define.BOOSTROOT" = "boost_install", "cmake.define.Boost_NO_SYSTEM_PATHS" = "ON" }
- 
- [tool.cibuildwheel.windows]
--before-all = "{project}\package\install-colmap-windows.ps1"
-+before-all = "& '{project}/package/install-colmap-windows.ps1'"
-
-From 1c2260da8c872e4ee687c56d30a9ba3fce39d464 Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Mon, 18 Dec 2023 12:10:46 +0100
-Subject: [PATCH 08/32] Quotes only?
-
----
- pyproject.toml | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/pyproject.toml b/pyproject.toml
-index ba5d58e..b7135e3 100644
---- a/pyproject.toml
-+++ b/pyproject.toml
-@@ -41,4 +41,4 @@ before-all = "{project}/package/install-colmap-macos.sh"
- config-settings = { "cmake.define.BOOSTROOT" = "boost_install", "cmake.define.Boost_NO_SYSTEM_PATHS" = "ON" }
- 
- [tool.cibuildwheel.windows]
--before-all = "& '{project}/package/install-colmap-windows.ps1'"
-+before-all = "'{project}/package/install-colmap-windows.ps1'"
-
-From 521794b15926e60983db4128c6a8f67780eb693b Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Mon, 18 Dec 2023 12:12:44 +0100
-Subject: [PATCH 09/32] Powershell prefix
-
----
- pyproject.toml | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/pyproject.toml b/pyproject.toml
-index b7135e3..81a7fdc 100644
---- a/pyproject.toml
-+++ b/pyproject.toml
-@@ -41,4 +41,4 @@ before-all = "{project}/package/install-colmap-macos.sh"
- config-settings = { "cmake.define.BOOSTROOT" = "boost_install", "cmake.define.Boost_NO_SYSTEM_PATHS" = "ON" }
- 
- [tool.cibuildwheel.windows]
--before-all = "'{project}/package/install-colmap-windows.ps1'"
-+before-all = "powershell.exe '{project}/package/install-colmap-windows.ps1'"
-
-From f1f89179f1f5752590f0012eca7a8b718d56b203 Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Mon, 18 Dec 2023 12:16:04 +0100
-Subject: [PATCH 10/32] Add &
-
----
- pyproject.toml | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/pyproject.toml b/pyproject.toml
-index 81a7fdc..94aa382 100644
---- a/pyproject.toml
-+++ b/pyproject.toml
-@@ -41,4 +41,4 @@ before-all = "{project}/package/install-colmap-macos.sh"
- config-settings = { "cmake.define.BOOSTROOT" = "boost_install", "cmake.define.Boost_NO_SYSTEM_PATHS" = "ON" }
- 
- [tool.cibuildwheel.windows]
--before-all = "powershell.exe '{project}/package/install-colmap-windows.ps1'"
-+before-all = "powershell '& {project}/package/install-colmap-windows.ps1'"
-
-From ef5d12488e7d35e075d8290a188719db8fe18259 Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Mon, 18 Dec 2023 12:18:00 +0100
-Subject: [PATCH 11/32] Add quotes
-
----
- pyproject.toml | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/pyproject.toml b/pyproject.toml
-index 94aa382..72047a3 100644
---- a/pyproject.toml
-+++ b/pyproject.toml
-@@ -41,4 +41,4 @@ before-all = "{project}/package/install-colmap-macos.sh"
- config-settings = { "cmake.define.BOOSTROOT" = "boost_install", "cmake.define.Boost_NO_SYSTEM_PATHS" = "ON" }
- 
- [tool.cibuildwheel.windows]
--before-all = "powershell '& {project}/package/install-colmap-windows.ps1'"
-+before-all = "powershell '& \"{project}/package/install-colmap-windows.ps1\"'"
-
-From a96e07acf4e291895f522d9435d2510842464d77 Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Mon, 18 Dec 2023 12:20:12 +0100
-Subject: [PATCH 12/32] Use file argument
-
----
- pyproject.toml | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/pyproject.toml b/pyproject.toml
-index 72047a3..2ba35e0 100644
---- a/pyproject.toml
-+++ b/pyproject.toml
-@@ -41,4 +41,4 @@ before-all = "{project}/package/install-colmap-macos.sh"
- config-settings = { "cmake.define.BOOSTROOT" = "boost_install", "cmake.define.Boost_NO_SYSTEM_PATHS" = "ON" }
- 
- [tool.cibuildwheel.windows]
--before-all = "powershell '& \"{project}/package/install-colmap-windows.ps1\"'"
-+before-all = "powershell -File '{project}/package/install-colmap-windows.ps1'"
-
-From 94b28aa0f374c59563981bde9030d6e326aec381 Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Mon, 18 Dec 2023 12:21:50 +0100
-Subject: [PATCH 13/32] Remove quotes
-
----
- pyproject.toml | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/pyproject.toml b/pyproject.toml
-index 2ba35e0..e88a064 100644
---- a/pyproject.toml
-+++ b/pyproject.toml
-@@ -41,4 +41,4 @@ before-all = "{project}/package/install-colmap-macos.sh"
- config-settings = { "cmake.define.BOOSTROOT" = "boost_install", "cmake.define.Boost_NO_SYSTEM_PATHS" = "ON" }
- 
- [tool.cibuildwheel.windows]
--before-all = "powershell -File '{project}/package/install-colmap-windows.ps1'"
-+before-all = "powershell -File {project}/package/install-colmap-windows.ps1"
-
-From ed03fc5567cb456495753444a2c6cecb3d20759a Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Mon, 18 Dec 2023 14:27:10 +0100
-Subject: [PATCH 14/32] Fix
-
----
- package/install-colmap-windows.ps1 | 6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
-
-diff --git a/package/install-colmap-windows.ps1 b/package/install-colmap-windows.ps1
-index ece11f4..9eabc62 100755
---- a/package/install-colmap-windows.ps1
-+++ b/package/install-colmap-windows.ps1
-@@ -1,5 +1,6 @@
- CURRDIR = $PWD
- 
-+echo $env:VCPKG_INSTALLATION_ROOT
- ${VCPKG_INSTALLATION_ROOT}/vcpkg.exe integrate install
- 
- curl -L -o ninja.zip https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
-@@ -20,5 +21,8 @@ cmake .. `
-   -DCMAKE_MAKE_PROGRAM=${NINJA_PATH} `
-   -DCMAKE_BUILD_TYPE=Release `
-   -DCMAKE_TOOLCHAIN_FILE=${VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake `
--  -DVCPKG_TARGET_TRIPLET=x64-windows
-+  -DVCPKG_TARGET_TRIPLET=x64-windows `
-+  -DCUDA_ENABLED=OFF `
-+  -DCGAL_ENABLED=OFF `
-+  -DGUI_ENABLED=OFF
- ${NINJA_PATH} install
-
-From 99bff44587ebd038b2075a32428062f24cd5f895 Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Mon, 18 Dec 2023 14:34:32 +0100
-Subject: [PATCH 15/32] Use quotes
-
----
- package/install-colmap-windows.ps1 | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
-
-diff --git a/package/install-colmap-windows.ps1 b/package/install-colmap-windows.ps1
-index 9eabc62..8f9e02b 100755
---- a/package/install-colmap-windows.ps1
-+++ b/package/install-colmap-windows.ps1
-@@ -1,10 +1,10 @@
- CURRDIR = $PWD
- 
- echo $env:VCPKG_INSTALLATION_ROOT
--${VCPKG_INSTALLATION_ROOT}/vcpkg.exe integrate install
-+"${VCPKG_INSTALLATION_ROOT}/vcpkg.exe" integrate install
- 
--curl -L -o ninja.zip https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip
--Expand-Archive -LiteralPath ${CURRDIR}/ninja.zip -DestinationPath ${CURRDIR}
-+curl -L -o "ninja.zip" "https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip"
-+Expand-Archive -LiteralPath "${CURRDIR}/ninja.zip" -DestinationPath ${CURRDIR}
- NINJA_PATH = "${CURRDIR}/ninja.exe"
- 
- cd ${CURRDIR}
-@@ -12,7 +12,7 @@ git clone https://github.com/colmap/colmap.git
- cd colmap
- git checkout c0355417328f3706a30a9265fd52bc7a5aa4cb8c
- 
--${VCPKG_INSTALLATION_ROOT}/vcpkg.exe install --recurse @./.azure-pipelines/build-windows-vcpkg.txt --clean-after-build
-+"${VCPKG_INSTALLATION_ROOT}/vcpkg.exe" install --recurse ".azure-pipelines/build-windows-vcpkg.txt" --clean-after-build
- 
- mkdir build
- cd build
-@@ -20,7 +20,7 @@ cmake .. `
-   -GNinja `
-   -DCMAKE_MAKE_PROGRAM=${NINJA_PATH} `
-   -DCMAKE_BUILD_TYPE=Release `
--  -DCMAKE_TOOLCHAIN_FILE=${VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake `
-+  -DCMAKE_TOOLCHAIN_FILE="${VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake" `
-   -DVCPKG_TARGET_TRIPLET=x64-windows `
-   -DCUDA_ENABLED=OFF `
-   -DCGAL_ENABLED=OFF `
-
-From a1b412f8f5138abd11ce0ddca266cbe85f53ca41 Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Mon, 18 Dec 2023 14:46:44 +0100
-Subject: [PATCH 16/32] Prefix with &
-
----
- package/install-colmap-windows.ps1 | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
-
-diff --git a/package/install-colmap-windows.ps1 b/package/install-colmap-windows.ps1
-index 8f9e02b..f5f5a71 100755
---- a/package/install-colmap-windows.ps1
-+++ b/package/install-colmap-windows.ps1
-@@ -1,7 +1,7 @@
- CURRDIR = $PWD
- 
- echo $env:VCPKG_INSTALLATION_ROOT
--"${VCPKG_INSTALLATION_ROOT}/vcpkg.exe" integrate install
-+& "${VCPKG_INSTALLATION_ROOT}/vcpkg.exe" integrate install
- 
- curl -L -o "ninja.zip" "https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip"
- Expand-Archive -LiteralPath "${CURRDIR}/ninja.zip" -DestinationPath ${CURRDIR}
-@@ -12,7 +12,7 @@ git clone https://github.com/colmap/colmap.git
- cd colmap
- git checkout c0355417328f3706a30a9265fd52bc7a5aa4cb8c
- 
--"${VCPKG_INSTALLATION_ROOT}/vcpkg.exe" install --recurse ".azure-pipelines/build-windows-vcpkg.txt" --clean-after-build
-+& "${VCPKG_INSTALLATION_ROOT}/vcpkg.exe" install --recurse ".azure-pipelines/build-windows-vcpkg.txt" --clean-after-build
- 
- mkdir build
- cd build
-@@ -25,4 +25,4 @@ cmake .. `
-   -DCUDA_ENABLED=OFF `
-   -DCGAL_ENABLED=OFF `
-   -DGUI_ENABLED=OFF
--${NINJA_PATH} install
-+& ${NINJA_PATH} install
-
-From 78678ef27991bab768f41bcfc7addbc4b27b7d75 Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Mon, 18 Dec 2023 14:52:58 +0100
-Subject: [PATCH 17/32] Fix
-
----
- package/install-colmap-windows.ps1 | 10 ++++++----
- 1 file changed, 6 insertions(+), 4 deletions(-)
-
-diff --git a/package/install-colmap-windows.ps1 b/package/install-colmap-windows.ps1
-index f5f5a71..d08b827 100755
---- a/package/install-colmap-windows.ps1
-+++ b/package/install-colmap-windows.ps1
-@@ -1,11 +1,13 @@
--CURRDIR = $PWD
-+$CURRDIR = $PWD
- 
--echo $env:VCPKG_INSTALLATION_ROOT
--& "${VCPKG_INSTALLATION_ROOT}/vcpkg.exe" integrate install
-+$env:VCPKG_INSTALLATION_ROOT
-+Dir -Recurse ${VCPKG_INSTALLATION_ROOT} | Get-Childitem
-+& "${VCPKG_INSTALLATION_ROOT}\vcpkg.exe" integrate install
- 
- curl -L -o "ninja.zip" "https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip"
- Expand-Archive -LiteralPath "${CURRDIR}/ninja.zip" -DestinationPath ${CURRDIR}
--NINJA_PATH = "${CURRDIR}/ninja.exe"
-+$NINJA_PATH = "${CURRDIR}/ninja.exe"
-+
- 
- cd ${CURRDIR}
- git clone https://github.com/colmap/colmap.git
-
-From 198486f31019424cfac8da62efa9219164e2a6bb Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Mon, 18 Dec 2023 14:58:28 +0100
-Subject: [PATCH 18/32] Fix
-
----
- package/install-colmap-windows.ps1 | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
-
-diff --git a/package/install-colmap-windows.ps1 b/package/install-colmap-windows.ps1
-index d08b827..b9f3036 100755
---- a/package/install-colmap-windows.ps1
-+++ b/package/install-colmap-windows.ps1
-@@ -1,10 +1,10 @@
- $CURRDIR = $PWD
- 
- $env:VCPKG_INSTALLATION_ROOT
--Dir -Recurse ${VCPKG_INSTALLATION_ROOT} | Get-Childitem
--& "${VCPKG_INSTALLATION_ROOT}\vcpkg.exe" integrate install
-+Dir -Recurse ${env:VCPKG_INSTALLATION_ROOT} | Get-Childitem
-+& "${env:VCPKG_INSTALLATION_ROOT}/vcpkg.exe" integrate install
- 
--curl -L -o "ninja.zip" "https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip"
-+curl.exe -L -o "ninja.zip" "https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip"
- Expand-Archive -LiteralPath "${CURRDIR}/ninja.zip" -DestinationPath ${CURRDIR}
- $NINJA_PATH = "${CURRDIR}/ninja.exe"
- 
-@@ -14,7 +14,7 @@ git clone https://github.com/colmap/colmap.git
- cd colmap
- git checkout c0355417328f3706a30a9265fd52bc7a5aa4cb8c
- 
--& "${VCPKG_INSTALLATION_ROOT}/vcpkg.exe" install --recurse ".azure-pipelines/build-windows-vcpkg.txt" --clean-after-build
-+& "${env:VCPKG_INSTALLATION_ROOT}/vcpkg.exe" install --recurse ".azure-pipelines/build-windows-vcpkg.txt" --clean-after-build
- 
- mkdir build
- cd build
-@@ -22,7 +22,7 @@ cmake .. `
-   -GNinja `
-   -DCMAKE_MAKE_PROGRAM=${NINJA_PATH} `
-   -DCMAKE_BUILD_TYPE=Release `
--  -DCMAKE_TOOLCHAIN_FILE="${VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake" `
-+  -DCMAKE_TOOLCHAIN_FILE="${env:VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake" `
-   -DVCPKG_TARGET_TRIPLET=x64-windows `
-   -DCUDA_ENABLED=OFF `
-   -DCGAL_ENABLED=OFF `
-
-From 8ad5ced352a6f19fee7c4ef726fa3382aa542758 Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Mon, 18 Dec 2023 15:18:18 +0100
-Subject: [PATCH 19/32] Fix
-
----
- package/install-colmap-windows.ps1 | 5 ++---
- 1 file changed, 2 insertions(+), 3 deletions(-)
-
-diff --git a/package/install-colmap-windows.ps1 b/package/install-colmap-windows.ps1
-index b9f3036..f8ec7e7 100755
---- a/package/install-colmap-windows.ps1
-+++ b/package/install-colmap-windows.ps1
-@@ -1,7 +1,5 @@
- $CURRDIR = $PWD
- 
--$env:VCPKG_INSTALLATION_ROOT
--Dir -Recurse ${env:VCPKG_INSTALLATION_ROOT} | Get-Childitem
- & "${env:VCPKG_INSTALLATION_ROOT}/vcpkg.exe" integrate install
- 
- curl.exe -L -o "ninja.zip" "https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip"
-@@ -14,7 +12,8 @@ git clone https://github.com/colmap/colmap.git
- cd colmap
- git checkout c0355417328f3706a30a9265fd52bc7a5aa4cb8c
- 
--& "${env:VCPKG_INSTALLATION_ROOT}/vcpkg.exe" install --recurse ".azure-pipelines/build-windows-vcpkg.txt" --clean-after-build
-+$packages = Get-Content -Path ".azure-pipelines/build-windows-vcpkg.txt"
-+& "${env:VCPKG_INSTALLATION_ROOT}/vcpkg.exe" install --recurse --clean-after-build @$packages
- 
- mkdir build
- cd build
-
-From 01982a4e6d0fe18f72573fca634bc798c9ec0cc1 Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Mon, 18 Dec 2023 15:23:38 +0100
-Subject: [PATCH 20/32] Fix
-
----
- package/install-colmap-windows.ps1 | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/package/install-colmap-windows.ps1 b/package/install-colmap-windows.ps1
-index f8ec7e7..58e195a 100755
---- a/package/install-colmap-windows.ps1
-+++ b/package/install-colmap-windows.ps1
-@@ -12,8 +12,8 @@ git clone https://github.com/colmap/colmap.git
- cd colmap
- git checkout c0355417328f3706a30a9265fd52bc7a5aa4cb8c
- 
--$packages = Get-Content -Path ".azure-pipelines/build-windows-vcpkg.txt"
--& "${env:VCPKG_INSTALLATION_ROOT}/vcpkg.exe" install --recurse --clean-after-build @$packages
-+$PACKAGE_NAMES = Get-Content -Path ".azure-pipelines/build-windows-vcpkg.txt"
-+& "${env:VCPKG_INSTALLATION_ROOT}/vcpkg.exe" install --recurse --clean-after-build @PACKAGE_NAMES
- 
- mkdir build
- cd build
-
-From 6494ee89a8b85949a47e5033b50510babebb55e5 Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Mon, 18 Dec 2023 17:19:59 +0100
-Subject: [PATCH 21/32] Missing quotes?
-
----
- package/install-colmap-windows.ps1 | 18 ++++++++++--------
- 1 file changed, 10 insertions(+), 8 deletions(-)
-
-diff --git a/package/install-colmap-windows.ps1 b/package/install-colmap-windows.ps1
-index 58e195a..068fda6 100755
---- a/package/install-colmap-windows.ps1
-+++ b/package/install-colmap-windows.ps1
-@@ -12,18 +12,20 @@ git clone https://github.com/colmap/colmap.git
- cd colmap
- git checkout c0355417328f3706a30a9265fd52bc7a5aa4cb8c
- 
--$PACKAGE_NAMES = Get-Content -Path ".azure-pipelines/build-windows-vcpkg.txt"
--& "${env:VCPKG_INSTALLATION_ROOT}/vcpkg.exe" install --recurse --clean-after-build @PACKAGE_NAMES
-+[System.Collections.ArrayList]$DEPS = Get-Content -Path ".azure-pipelines/build-windows-vcpkg.txt"
-+$DEPS.Remove("cgal")
-+$DEPS.Remove("qt5-base")
-+& "${env:VCPKG_INSTALLATION_ROOT}/vcpkg.exe" install --recurse --clean-after-build @DEPS
- 
- mkdir build
- cd build
- cmake .. `
-   -GNinja `
--  -DCMAKE_MAKE_PROGRAM=${NINJA_PATH} `
--  -DCMAKE_BUILD_TYPE=Release `
 +  -DCMAKE_MAKE_PROGRAM="${NINJA_PATH}" `
++  -DCMAKE_TOOLCHAIN_FILE="${env:VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake" `
 +  -DCMAKE_BUILD_TYPE="Release" `
-   -DCMAKE_TOOLCHAIN_FILE="${env:VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake" `
--  -DVCPKG_TARGET_TRIPLET=x64-windows `
--  -DCUDA_ENABLED=OFF `
--  -DCGAL_ENABLED=OFF `
--  -DGUI_ENABLED=OFF
 +  -DVCPKG_TARGET_TRIPLET="x64-windows" `
 +  -DCUDA_ENABLED="OFF" `
 +  -DCGAL_ENABLED="OFF" `
 +  -DGUI_ENABLED="OFF"
- & ${NINJA_PATH} install
-
-From 6a7578272919ee0e185b0b265feb63f3b09bf876 Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Tue, 19 Dec 2023 00:05:52 +0100
-Subject: [PATCH 22/32] Fix
-
----
- package/install-colmap-windows.ps1 | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
-
-diff --git a/package/install-colmap-windows.ps1 b/package/install-colmap-windows.ps1
-index 068fda6..908f2b1 100755
---- a/package/install-colmap-windows.ps1
-+++ b/package/install-colmap-windows.ps1
-@@ -1,21 +1,21 @@
- $CURRDIR = $PWD
- 
--& "${env:VCPKG_INSTALLATION_ROOT}/vcpkg.exe" integrate install
--
- curl.exe -L -o "ninja.zip" "https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip"
- Expand-Archive -LiteralPath "${CURRDIR}/ninja.zip" -DestinationPath ${CURRDIR}
- $NINJA_PATH = "${CURRDIR}/ninja.exe"
- 
--
- cd ${CURRDIR}
- git clone https://github.com/colmap/colmap.git
- cd colmap
- git checkout c0355417328f3706a30a9265fd52bc7a5aa4cb8c
- 
-+& "./scripts/shell/enter_vs_dev_shell.ps1"
-+
- [System.Collections.ArrayList]$DEPS = Get-Content -Path ".azure-pipelines/build-windows-vcpkg.txt"
- $DEPS.Remove("cgal")
- $DEPS.Remove("qt5-base")
- & "${env:VCPKG_INSTALLATION_ROOT}/vcpkg.exe" install --recurse --clean-after-build @DEPS
-+& "${env:VCPKG_INSTALLATION_ROOT}/vcpkg.exe" integrate install
- 
- mkdir build
- cd build
-
-From 8f6593d829cc9aa557d32f77521f52002826b282 Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Tue, 19 Dec 2023 01:07:23 +0100
-Subject: [PATCH 23/32] Add boost-heap
-
----
- package/install-colmap-windows.ps1 | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/package/install-colmap-windows.ps1 b/package/install-colmap-windows.ps1
-index 908f2b1..8aba457 100755
---- a/package/install-colmap-windows.ps1
-+++ b/package/install-colmap-windows.ps1
-@@ -14,6 +14,7 @@ git checkout c0355417328f3706a30a9265fd52bc7a5aa4cb8c
- [System.Collections.ArrayList]$DEPS = Get-Content -Path ".azure-pipelines/build-windows-vcpkg.txt"
- $DEPS.Remove("cgal")
- $DEPS.Remove("qt5-base")
-+$DEPS.Add("boost-heap")
- & "${env:VCPKG_INSTALLATION_ROOT}/vcpkg.exe" install --recurse --clean-after-build @DEPS
- & "${env:VCPKG_INSTALLATION_ROOT}/vcpkg.exe" integrate install
- 
-
-From 280214dd2d8dec38b2677bb478d9ff8178ed7926 Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Tue, 19 Dec 2023 10:09:39 +0100
-Subject: [PATCH 24/32] Add vcpkg flags to wheel build
-
----
- package/install-colmap-windows.ps1 | 1 -
- pyproject.toml                     | 1 +
- 2 files changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/package/install-colmap-windows.ps1 b/package/install-colmap-windows.ps1
-index 8aba457..a80dcd2 100755
---- a/package/install-colmap-windows.ps1
-+++ b/package/install-colmap-windows.ps1
-@@ -23,7 +23,6 @@ cd build
- cmake .. `
-   -GNinja `
-   -DCMAKE_MAKE_PROGRAM="${NINJA_PATH}" `
--  -DCMAKE_BUILD_TYPE="Release" `
-   -DCMAKE_TOOLCHAIN_FILE="${env:VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake" `
-   -DVCPKG_TARGET_TRIPLET="x64-windows" `
-   -DCUDA_ENABLED="OFF" `
-diff --git a/pyproject.toml b/pyproject.toml
-index e88a064..3de31b1 100644
---- a/pyproject.toml
-+++ b/pyproject.toml
-@@ -42,3 +42,4 @@ config-settings = { "cmake.define.BOOSTROOT" = "boost_install", "cmake.define.Bo
- 
- [tool.cibuildwheel.windows]
- before-all = "powershell -File {project}/package/install-colmap-windows.ps1"
-+config-settings = { "cmake.define.CMAKE_TOOLCHAIN_FILE" = "${VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake", "cmake.define.VCPKG_TARGET_TRIPLET" = "x64-windows" }
-
-From 2665341bf93770777b92ba068519c83eaf7a680e Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Tue, 19 Dec 2023 11:15:24 +0100
-Subject: [PATCH 25/32] Fix
-
----
- pyproject.toml | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/pyproject.toml b/pyproject.toml
-index 3de31b1..80f0a40 100644
---- a/pyproject.toml
-+++ b/pyproject.toml
-@@ -42,4 +42,4 @@ config-settings = { "cmake.define.BOOSTROOT" = "boost_install", "cmake.define.Bo
- 
- [tool.cibuildwheel.windows]
- before-all = "powershell -File {project}/package/install-colmap-windows.ps1"
--config-settings = { "cmake.define.CMAKE_TOOLCHAIN_FILE" = "${VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake", "cmake.define.VCPKG_TARGET_TRIPLET" = "x64-windows" }
-+environment = { CMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake", VCPKG_TARGET_TRIPLET="x64-windows" }
-
-From 16abcb83e320dce8a68c28e149916ce4a573707e Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Tue, 19 Dec 2023 13:45:17 +0100
-Subject: [PATCH 26/32] Suppress MSVC warnings
-
----
- pycolmap/helpers.h              | 2 +-
- pycolmap/scene/image.h          | 4 ++--
- pycolmap/scene/point2D.h        | 2 +-
- pycolmap/scene/reconstruction.h | 2 +-
- 4 files changed, 5 insertions(+), 5 deletions(-)
-
++& ${NINJA_PATH} install
 diff --git a/pycolmap/helpers.h b/pycolmap/helpers.h
 index 1ffbaf2..fe2d64e 100644
 --- a/pycolmap/helpers.h
@@ -755,6 +105,128 @@ index 1ffbaf2..fe2d64e 100644
              continue;  // We anyway throw afterwards
            }
          }
+diff --git a/pycolmap/main.cc b/pycolmap/main.cc
+index 91a1dff..39206e0 100644
+--- a/pycolmap/main.cc
++++ b/pycolmap/main.cc
+@@ -17,10 +17,10 @@ namespace py = pybind11;
+ 
+ struct Logging {
+   enum class Level {
+-    INFO = google::GLOG_INFO,
+-    WARNING = google::GLOG_WARNING,
+-    ERROR = google::GLOG_ERROR,
+-    FATAL = google::GLOG_FATAL,
++    INFO_ = google::GLOG_INFO,
++    WARNING_ = google::GLOG_WARNING,
++    ERROR_ = google::GLOG_ERROR,
++    FATAL_ = google::GLOG_FATAL,
+   };
+ };  // dummy class
+ 
+@@ -48,10 +48,10 @@ PYBIND11_MODULE(pycolmap, m) {
+           .def_static("fatal",
+                       [](const std::string& msg) { LOG(FATAL) << msg; });
+   py::enum_<Logging::Level>(PyLogging, "Level")
+-      .value("INFO", Logging::Level::INFO)
+-      .value("WARNING", Logging::Level::WARNING)
+-      .value("ERROR", Logging::Level::ERROR)
+-      .value("FATAL", Logging::Level::FATAL)
++      .value("INFO", Logging::Level::INFO_)
++      .value("WARNING", Logging::Level::WARNING_)
++      .value("ERROR", Logging::Level::ERROR_)
++      .value("FATAL", Logging::Level::FATAL_)
+       .export_values();
+   google::InitGoogleLogging("");
+   google::InstallFailureSignalHandler();
+diff --git a/pycolmap/pipeline/mvs.h b/pycolmap/pipeline/mvs.h
+index e694e36..f14e3dc 100644
+--- a/pycolmap/pipeline/mvs.h
++++ b/pycolmap/pipeline/mvs.h
+@@ -7,11 +7,14 @@
+ #include "colmap/feature/sift.h"
+ #include "colmap/mvs/fusion.h"
+ #include "colmap/mvs/meshing.h"
+-#include "colmap/mvs/patch_match.h"
+ #include "colmap/scene/reconstruction.h"
+ #include "colmap/sensor/models.h"
+ #include "colmap/util/misc.h"
+ 
++#ifdef COLMAP_CUDA_ENABLED
++#include "colmap/mvs/patch_match.h"
++#endif  // COLMAP_CUDA_ENABLED
++
+ #include "pycolmap/helpers.h"
+ #include "pycolmap/log_exceptions.h"
+ 
+@@ -24,17 +27,12 @@ using namespace colmap;
+ using namespace pybind11::literals;
+ namespace py = pybind11;
+ 
++#ifdef COLMAP_CUDA_ENABLED
+ void PatchMatchStereo(py::object workspace_path_,
+                       std::string workspace_format,
+                       std::string pmvs_option_name,
+                       mvs::PatchMatchOptions options,
+                       std::string config_path) {
+-#ifndef COLMAP_CUDA_ENABLED
+-  THROW_EXCEPTION(std::runtime_error,
+-                  "Dense stereo reconstruction requires CUDA, which is not "
+-                  "available on the system.");
+-  return;
+-#endif  // COLMAP_CUDA_ENABLED
+   std::string workspace_path = py::str(workspace_path_).cast<std::string>();
+   THROW_CHECK_DIR_EXISTS(workspace_path);
+ 
+@@ -51,6 +49,7 @@ void PatchMatchStereo(py::object workspace_path_,
+   controller.Start();
+   PyWait(&controller);
+ }
++#endif  // COLMAP_CUDA_ENABLED
+ 
+ Reconstruction StereoFusion(py::object output_path_,
+                             py::object workspace_path_,
+@@ -106,6 +105,7 @@ Reconstruction StereoFusion(py::object output_path_,
+ }
+ 
+ void BindMVS(py::module& m) {
++#ifdef COLMAP_CUDA_ENABLED
+   using PMOpts = mvs::PatchMatchOptions;
+   auto PyPatchMatchOptions =
+       py::class_<PMOpts>(m, "PatchMatchOptions")
+@@ -195,6 +195,16 @@ void BindMVS(py::module& m) {
+   make_dataclass(PyPatchMatchOptions);
+   auto patch_match_options = PyPatchMatchOptions().cast<PMOpts>();
+ 
++  m.def("patch_match_stereo",
++        &PatchMatchStereo,
++        "workspace_path"_a,
++        "workspace_format"_a = "COLMAP",
++        "pmvs_option_name"_a = "option-all",
++        "options"_a = patch_match_options,
++        "config_path"_a = "",
++        "Runs Patch-Match-Stereo (requires CUDA)");
++#endif  // COLMAP_CUDA_ENABLED
++
+   using SFOpts = mvs::StereoFusionOptions;
+   auto PyStereoFusionOptions =
+       py::class_<SFOpts>(m, "StereoFusionOptions")
+@@ -249,15 +259,6 @@ void BindMVS(py::module& m) {
+   make_dataclass(PyStereoFusionOptions);
+   auto stereo_fusion_options = PyStereoFusionOptions().cast<SFOpts>();
+ 
+-  m.def("patch_match_stereo",
+-        &PatchMatchStereo,
+-        "workspace_path"_a,
+-        "workspace_format"_a = "COLMAP",
+-        "pmvs_option_name"_a = "option-all",
+-        "options"_a = patch_match_options,
+-        "config_path"_a = "",
+-        "Runs Patch-Match-Stereo (requires CUDA)");
+-
+   m.def("stereo_fusion",
+         &StereoFusion,
+         "output_path"_a,
 diff --git a/pycolmap/scene/image.h b/pycolmap/scene/image.h
 index 3c2d830..908497f 100644
 --- a/pycolmap/scene/image.h
@@ -803,282 +275,29 @@ index c8b4792..0124e50 100644
              THROW_CHECK(!self.ExistsCamera(camera.camera_id));
              THROW_CHECK(camera.VerifyParams());
              self.AddCamera(camera);
-
-From af18ef0365dcdf550c0b5650508e4b3c2641641b Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Tue, 19 Dec 2023 13:54:00 +0100
-Subject: [PATCH 27/32] Add missing glog target
-
----
- CMakeLists.txt | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index cc4b063..f975337 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -10,6 +10,6 @@ find_package(pybind11 REQUIRED)
+diff --git a/pyproject.toml b/pyproject.toml
+index 4467d12..80f0a40 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -28,14 +28,18 @@ wheel.expand-macos-universal-tags = true
  
- pybind11_add_module(pycolmap pycolmap/main.cc)
- target_include_directories(pycolmap PRIVATE ${PROJECT_SOURCE_DIR})
--target_link_libraries(pycolmap PRIVATE colmap::colmap freeimage::FreeImage)
-+target_link_libraries(pycolmap PRIVATE colmap::colmap freeimage::FreeImage glog::glog)
- target_compile_definitions(pycolmap PRIVATE VERSION_INFO="${PROJECT_VERSION}")
- install(TARGETS pycolmap LIBRARY DESTINATION .)
-
-From dd9a988b34c3550f797e8f1404c430b549b56a4c Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Tue, 19 Dec 2023 13:54:17 +0100
-Subject: [PATCH 28/32] Build COLMAP with config Release
-
----
- package/install-colmap-windows.ps1 | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/package/install-colmap-windows.ps1 b/package/install-colmap-windows.ps1
-index a80dcd2..f457fce 100755
---- a/package/install-colmap-windows.ps1
-+++ b/package/install-colmap-windows.ps1
-@@ -24,6 +24,7 @@ cmake .. `
-   -GNinja `
-   -DCMAKE_MAKE_PROGRAM="${NINJA_PATH}" `
-   -DCMAKE_TOOLCHAIN_FILE="${env:VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake" `
-+  -DCMAKE_BUILD_TYPE="Release" `
-   -DVCPKG_TARGET_TRIPLET="x64-windows" `
-   -DCUDA_ENABLED="OFF" `
-   -DCGAL_ENABLED="OFF" `
-
-From 2b9b0da6951dee99475b6acf2749cfb92c064e8c Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Tue, 19 Dec 2023 15:15:42 +0100
-Subject: [PATCH 29/32] Add MSVC options
-
----
- CMakeLists.txt | 12 ++++++++++++
- 1 file changed, 12 insertions(+)
-
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index f975337..d8a2ce2 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -2,6 +2,18 @@ cmake_minimum_required(VERSION 3.10)
- project(${SKBUILD_PROJECT_NAME} VERSION ${SKBUILD_PROJECT_VERSION})
  
- set(CMAKE_CUDA_ARCHITECTURES "native")
-+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-+    # Some fixes for the Glog library.
-+    add_definitions("-DGLOG_NO_ABBREVIATED_SEVERITIES")
-+    add_definitions("-DGL_GLEXT_PROTOTYPES")
-+    add_definitions("-DNOMINMAX")
-+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
-+    # Enable object level parallel builds in Visual Studio.
-+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MP")
-+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
-+endif()
+ [tool.cibuildwheel]
+-build = "cp3{8,9,10,11}-{macosx,manylinux}*"
++build = "cp3{8,9,10,11}-{macosx,manylinux,win}*"
+ archs = ["auto64"]
+ test-command = "python -c 'import pycolmap; print(pycolmap.__version__)'"
+ 
+ [tool.cibuildwheel.linux]
+-before-all = "./package/install-colmap-centos.sh"
++before-all = "{project}/package/install-colmap-centos.sh"
+ config-settings = "cmake.define.EIGEN3_INCLUDE_DIRS=eigen"
+ 
+ [tool.cibuildwheel.macos]
+-before-all = "./package/install-colmap-macos.sh"
++before-all = "{project}/package/install-colmap-macos.sh"
+ config-settings = { "cmake.define.BOOSTROOT" = "boost_install", "cmake.define.Boost_NO_SYSTEM_PATHS" = "ON" }
 +
-+
- find_package(colmap 3.9 REQUIRED)
- 
- find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
-
-From 301b95a79aeef6766cda136f5da80c0a22fd4511 Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Tue, 19 Dec 2023 15:17:11 +0100
-Subject: [PATCH 30/32] Remporarily remove logging levels
-
----
- pycolmap/main.cc | 24 ++++++++++++------------
- 1 file changed, 12 insertions(+), 12 deletions(-)
-
-diff --git a/pycolmap/main.cc b/pycolmap/main.cc
-index 91a1dff..abefce2 100644
---- a/pycolmap/main.cc
-+++ b/pycolmap/main.cc
-@@ -16,12 +16,12 @@
- namespace py = pybind11;
- 
- struct Logging {
--  enum class Level {
--    INFO = google::GLOG_INFO,
--    WARNING = google::GLOG_WARNING,
--    ERROR = google::GLOG_ERROR,
--    FATAL = google::GLOG_FATAL,
--  };
-+  //enum class Level {
-+    //INFO = google::GLOG_INFO,
-+    //WARNING = google::GLOG_WARNING,
-+    //ERROR = google::GLOG_ERROR,
-+    //FATAL = google::GLOG_FATAL,
-+  //};
- };  // dummy class
- 
- PYBIND11_MODULE(pycolmap, m) {
-@@ -47,12 +47,12 @@ PYBIND11_MODULE(pycolmap, m) {
-                       [](const std::string& msg) { LOG(ERROR) << msg; })
-           .def_static("fatal",
-                       [](const std::string& msg) { LOG(FATAL) << msg; });
--  py::enum_<Logging::Level>(PyLogging, "Level")
--      .value("INFO", Logging::Level::INFO)
--      .value("WARNING", Logging::Level::WARNING)
--      .value("ERROR", Logging::Level::ERROR)
--      .value("FATAL", Logging::Level::FATAL)
--      .export_values();
-+  //py::enum_<Logging::Level>(PyLogging, "Level")
-+      //.value("INFO", Logging::Level::INFO)
-+      //.value("WARNING", Logging::Level::WARNING)
-+      //.value("ERROR", Logging::Level::ERROR)
-+      //.value("FATAL", Logging::Level::FATAL)
-+      //.export_values();
-   google::InitGoogleLogging("");
-   google::InstallFailureSignalHandler();
-   FLAGS_logtostderr = true;
-
-From e21c1c4ca94a56a1c2d0c94156efdc03e680b144 Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Tue, 19 Dec 2023 15:25:12 +0100
-Subject: [PATCH 31/32] Change the names of the logging levels
-
----
- pycolmap/main.cc | 24 ++++++++++++------------
- 1 file changed, 12 insertions(+), 12 deletions(-)
-
-diff --git a/pycolmap/main.cc b/pycolmap/main.cc
-index abefce2..39206e0 100644
---- a/pycolmap/main.cc
-+++ b/pycolmap/main.cc
-@@ -16,12 +16,12 @@
- namespace py = pybind11;
- 
- struct Logging {
--  //enum class Level {
--    //INFO = google::GLOG_INFO,
--    //WARNING = google::GLOG_WARNING,
--    //ERROR = google::GLOG_ERROR,
--    //FATAL = google::GLOG_FATAL,
--  //};
-+  enum class Level {
-+    INFO_ = google::GLOG_INFO,
-+    WARNING_ = google::GLOG_WARNING,
-+    ERROR_ = google::GLOG_ERROR,
-+    FATAL_ = google::GLOG_FATAL,
-+  };
- };  // dummy class
- 
- PYBIND11_MODULE(pycolmap, m) {
-@@ -47,12 +47,12 @@ PYBIND11_MODULE(pycolmap, m) {
-                       [](const std::string& msg) { LOG(ERROR) << msg; })
-           .def_static("fatal",
-                       [](const std::string& msg) { LOG(FATAL) << msg; });
--  //py::enum_<Logging::Level>(PyLogging, "Level")
--      //.value("INFO", Logging::Level::INFO)
--      //.value("WARNING", Logging::Level::WARNING)
--      //.value("ERROR", Logging::Level::ERROR)
--      //.value("FATAL", Logging::Level::FATAL)
--      //.export_values();
-+  py::enum_<Logging::Level>(PyLogging, "Level")
-+      .value("INFO", Logging::Level::INFO_)
-+      .value("WARNING", Logging::Level::WARNING_)
-+      .value("ERROR", Logging::Level::ERROR_)
-+      .value("FATAL", Logging::Level::FATAL_)
-+      .export_values();
-   google::InitGoogleLogging("");
-   google::InstallFailureSignalHandler();
-   FLAGS_logtostderr = true;
-
-From 4b3233b2afbb183dd83828f7fc204223945ef020 Mon Sep 17 00:00:00 2001
-From: Paul-Edouard Sarlin <paul.edouard.sarlin@gmail.com>
-Date: Wed, 20 Dec 2023 00:43:34 +0100
-Subject: [PATCH 32/32] Skip patch_match_stereo if CUDA is disabled
-
----
- pycolmap/pipeline/mvs.h | 33 +++++++++++++++++----------------
- 1 file changed, 17 insertions(+), 16 deletions(-)
-
-diff --git a/pycolmap/pipeline/mvs.h b/pycolmap/pipeline/mvs.h
-index e694e36..f14e3dc 100644
---- a/pycolmap/pipeline/mvs.h
-+++ b/pycolmap/pipeline/mvs.h
-@@ -7,11 +7,14 @@
- #include "colmap/feature/sift.h"
- #include "colmap/mvs/fusion.h"
- #include "colmap/mvs/meshing.h"
--#include "colmap/mvs/patch_match.h"
- #include "colmap/scene/reconstruction.h"
- #include "colmap/sensor/models.h"
- #include "colmap/util/misc.h"
- 
-+#ifndef COLMAP_CUDA_ENABLED
-+#include "colmap/mvs/patch_match.h"
-+#endif  // COLMAP_CUDA_ENABLED
-+
- #include "pycolmap/helpers.h"
- #include "pycolmap/log_exceptions.h"
- 
-@@ -24,17 +27,12 @@ using namespace colmap;
- using namespace pybind11::literals;
- namespace py = pybind11;
- 
-+#ifndef COLMAP_CUDA_ENABLED
- void PatchMatchStereo(py::object workspace_path_,
-                       std::string workspace_format,
-                       std::string pmvs_option_name,
-                       mvs::PatchMatchOptions options,
-                       std::string config_path) {
--#ifndef COLMAP_CUDA_ENABLED
--  THROW_EXCEPTION(std::runtime_error,
--                  "Dense stereo reconstruction requires CUDA, which is not "
--                  "available on the system.");
--  return;
--#endif  // COLMAP_CUDA_ENABLED
-   std::string workspace_path = py::str(workspace_path_).cast<std::string>();
-   THROW_CHECK_DIR_EXISTS(workspace_path);
- 
-@@ -51,6 +49,7 @@ void PatchMatchStereo(py::object workspace_path_,
-   controller.Start();
-   PyWait(&controller);
- }
-+#endif  // COLMAP_CUDA_ENABLED
- 
- Reconstruction StereoFusion(py::object output_path_,
-                             py::object workspace_path_,
-@@ -106,6 +105,7 @@ Reconstruction StereoFusion(py::object output_path_,
- }
- 
- void BindMVS(py::module& m) {
-+#ifndef COLMAP_CUDA_ENABLED
-   using PMOpts = mvs::PatchMatchOptions;
-   auto PyPatchMatchOptions =
-       py::class_<PMOpts>(m, "PatchMatchOptions")
-@@ -195,6 +195,16 @@ void BindMVS(py::module& m) {
-   make_dataclass(PyPatchMatchOptions);
-   auto patch_match_options = PyPatchMatchOptions().cast<PMOpts>();
- 
-+  m.def("patch_match_stereo",
-+        &PatchMatchStereo,
-+        "workspace_path"_a,
-+        "workspace_format"_a = "COLMAP",
-+        "pmvs_option_name"_a = "option-all",
-+        "options"_a = patch_match_options,
-+        "config_path"_a = "",
-+        "Runs Patch-Match-Stereo (requires CUDA)");
-+#endif  // COLMAP_CUDA_ENABLED
-+
-   using SFOpts = mvs::StereoFusionOptions;
-   auto PyStereoFusionOptions =
-       py::class_<SFOpts>(m, "StereoFusionOptions")
-@@ -249,15 +259,6 @@ void BindMVS(py::module& m) {
-   make_dataclass(PyStereoFusionOptions);
-   auto stereo_fusion_options = PyStereoFusionOptions().cast<SFOpts>();
- 
--  m.def("patch_match_stereo",
--        &PatchMatchStereo,
--        "workspace_path"_a,
--        "workspace_format"_a = "COLMAP",
--        "pmvs_option_name"_a = "option-all",
--        "options"_a = patch_match_options,
--        "config_path"_a = "",
--        "Runs Patch-Match-Stereo (requires CUDA)");
--
-   m.def("stereo_fusion",
-         &StereoFusion,
-         "output_path"_a,
++[tool.cibuildwheel.windows]
++before-all = "powershell -File {project}/package/install-colmap-windows.ps1"
++environment = { CMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake", VCPKG_TARGET_TRIPLET="x64-windows" }
