@@ -11,11 +11,15 @@ source:
     sha256: 0fa8b72e54825a113aed4ea9ad67ab50e80851645c81be5672ff2123e4fa4e76
     patches:
       - 214.patch
-      - always-use-cuda.patch  # [win and cuda_compiler_version not in (undefined, "None")]
 
 build:
   number: 0
-  script: {{ PYTHON }} -m pip install . -vv
+  # scikit-build tries to find the latest MSVC compiler instead instead of using
+  # cl.exe from the current environment, so on Windows we need to set the full
+  # compiler paths in a script.
+  script: {{ PYTHON }} -m pip install . -vv  # [not win]
+  script_env:
+    - CMAKE_GENERATOR=Ninja
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version not in (undefined, "None")]
   string: cpu_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version in (undefined, "None")]
   skip: true  # [win and cuda_compiler_version == "11.2"]
@@ -30,7 +34,7 @@ requirements:
     - {{ compiler('cuda') }}                 # [cuda_compiler_version not in (undefined, "None")]
     - cmake
     - make                                   # [unix]
-    - ninja                                  # [win]
+    - ninja
     - python                                 # [build_platform != target_platform]
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
     - pybind11                               # [build_platform != target_platform]
