@@ -57,9 +57,7 @@ requirements:
     - scikit-build-core
     - pybind11
     - libboost-devel
-    - colmap 3.9*
-    # - colmap 3.9*=gpu*_102  # [win and cuda_compiler_version not in (undefined, "None")]
-    # - colmap 3.9*=cpu*_2    # [win and cuda_compiler_version in (undefined, "None")]
+    - colmap
     - libblas
     - libcblas
     - cgal-cpp
