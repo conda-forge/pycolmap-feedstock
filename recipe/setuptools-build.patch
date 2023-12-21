@@ -9,14 +9,6 @@ index d8a2ce2..344c035 100644
  
  set(CMAKE_CUDA_ARCHITECTURES "native")
  if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-@@ -24,4 +24,6 @@ pybind11_add_module(pycolmap pycolmap/main.cc)
- target_include_directories(pycolmap PRIVATE ${PROJECT_SOURCE_DIR})
- target_link_libraries(pycolmap PRIVATE colmap::colmap freeimage::FreeImage glog::glog)
- target_compile_definitions(pycolmap PRIVATE VERSION_INFO="${PROJECT_VERSION}")
--install(TARGETS pycolmap LIBRARY DESTINATION .)
-+set_target_properties(pycolmap PROPERTIES
-+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/pycolmap"
-+)
 diff --git a/pyproject.toml b/pyproject.toml
 deleted file mode 100644
 index 4467d12..0000000
