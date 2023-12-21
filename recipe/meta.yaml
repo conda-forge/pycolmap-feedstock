@@ -15,9 +15,6 @@ source:
 
 build:
   number: 0
-  # scikit-build tries to find the latest MSVC compiler instead instead of using
-  # cl.exe from the current environment, so on Windows we need to set the full
-  # compiler paths in a script.
   script: {{ PYTHON }} -m pip install . -vv
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version not in (undefined, "None")]
   string: cpu_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version in (undefined, "None")]
