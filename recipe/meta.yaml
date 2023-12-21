@@ -61,7 +61,7 @@ requirements:
     - pybind11
     - libboost-devel
     - colmap 3.9*           # [not win]
-    - colmap 3.9*=*_101     # [win and (cuda_compiler_version or "").startswith("12")]
+    - colmap 3.9*           # [win and (cuda_compiler_version or "").startswith("12")]
     - colmap 3.9*=gpu*_101  # [win and cuda_compiler_version not in (undefined, "None") and not (cuda_compiler_version or "").startswith("12")]
     - colmap 3.9*=cpu*_1    # [win and cuda_compiler_version in (undefined, "None")]
     - libblas
