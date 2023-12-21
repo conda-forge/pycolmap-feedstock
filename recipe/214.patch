@@ -10,19 +10,6 @@ Subject: [PATCH 01/32] Windows CI
  3 files changed, 27 insertions(+), 4 deletions(-)
  create mode 100755 package/install-colmap-windows.ps1
 
-diff --git a/.github/workflows/build-new.yml b/.github/workflows/build-new.yml
-index f3c6769..9a22ff3 100644
---- a/.github/workflows/build-new.yml
-+++ b/.github/workflows/build-new.yml
-@@ -16,7 +16,7 @@ jobs:
-     runs-on: ${{ matrix.os }}
-     strategy:
-       matrix:
--        os: [ubuntu-latest, macos-12, macos-13]
-+        os: [ubuntu-latest, macos-12, macos-13, windows-latest]
-     steps:
-       - uses: actions/checkout@v4
-       - name: Build wheels
 diff --git a/CMakeLists.txt b/CMakeLists.txt
 index cc4b063..d8a2ce2 100644
 --- a/CMakeLists.txt
@@ -54,44 +41,6 @@ index cc4b063..d8a2ce2 100644
 +target_link_libraries(pycolmap PRIVATE colmap::colmap freeimage::FreeImage glog::glog)
  target_compile_definitions(pycolmap PRIVATE VERSION_INFO="${PROJECT_VERSION}")
  install(TARGETS pycolmap LIBRARY DESTINATION .)
-diff --git a/package/install-colmap-windows.ps1 b/package/install-colmap-windows.ps1
-new file mode 100755
-index 0000000..f457fce
---- /dev/null
-+++ b/package/install-colmap-windows.ps1
-@@ -0,0 +1,32 @@
-+$CURRDIR = $PWD
-+
-+curl.exe -L -o "ninja.zip" "https://github.com/ninja-build/ninja/releases/download/v1.10.2/ninja-win.zip"
-+Expand-Archive -LiteralPath "${CURRDIR}/ninja.zip" -DestinationPath ${CURRDIR}
-+$NINJA_PATH = "${CURRDIR}/ninja.exe"
-+
-+cd ${CURRDIR}
-+git clone https://github.com/colmap/colmap.git
-+cd colmap
-+git checkout c0355417328f3706a30a9265fd52bc7a5aa4cb8c
-+
-+& "./scripts/shell/enter_vs_dev_shell.ps1"
-+
-+[System.Collections.ArrayList]$DEPS = Get-Content -Path ".azure-pipelines/build-windows-vcpkg.txt"
-+$DEPS.Remove("cgal")
-+$DEPS.Remove("qt5-base")
-+$DEPS.Add("boost-heap")
-+& "${env:VCPKG_INSTALLATION_ROOT}/vcpkg.exe" install --recurse --clean-after-build @DEPS
-+& "${env:VCPKG_INSTALLATION_ROOT}/vcpkg.exe" integrate install
-+
-+mkdir build
-+cd build
-+cmake .. `
-+  -GNinja `
-+  -DCMAKE_MAKE_PROGRAM="${NINJA_PATH}" `
-+  -DCMAKE_TOOLCHAIN_FILE="${env:VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake" `
-+  -DCMAKE_BUILD_TYPE="Release" `
-+  -DVCPKG_TARGET_TRIPLET="x64-windows" `
-+  -DCUDA_ENABLED="OFF" `
-+  -DCGAL_ENABLED="OFF" `
-+  -DGUI_ENABLED="OFF"
-+& ${NINJA_PATH} install
 diff --git a/pycolmap/helpers.h b/pycolmap/helpers.h
 index 1ffbaf2..fe2d64e 100644
 --- a/pycolmap/helpers.h
@@ -275,29 +224,3 @@ index c8b4792..0124e50 100644
              THROW_CHECK(!self.ExistsCamera(camera.camera_id));
              THROW_CHECK(camera.VerifyParams());
              self.AddCamera(camera);
-diff --git a/pyproject.toml b/pyproject.toml
-index 4467d12..80f0a40 100644
---- a/pyproject.toml
-+++ b/pyproject.toml
-@@ -28,14 +28,18 @@ wheel.expand-macos-universal-tags = true
- 
- 
- [tool.cibuildwheel]
--build = "cp3{8,9,10,11}-{macosx,manylinux}*"
-+build = "cp3{8,9,10,11}-{macosx,manylinux,win}*"
- archs = ["auto64"]
- test-command = "python -c 'import pycolmap; print(pycolmap.__version__)'"
- 
- [tool.cibuildwheel.linux]
--before-all = "./package/install-colmap-centos.sh"
-+before-all = "{project}/package/install-colmap-centos.sh"
- config-settings = "cmake.define.EIGEN3_INCLUDE_DIRS=eigen"
- 
- [tool.cibuildwheel.macos]
--before-all = "./package/install-colmap-macos.sh"
-+before-all = "{project}/package/install-colmap-macos.sh"
- config-settings = { "cmake.define.BOOSTROOT" = "boost_install", "cmake.define.Boost_NO_SYSTEM_PATHS" = "ON" }
-+
-+[tool.cibuildwheel.windows]
-+before-all = "powershell -File {project}/package/install-colmap-windows.ps1"
-+environment = { CMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake", VCPKG_TARGET_TRIPLET="x64-windows" }
