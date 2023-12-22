@@ -1,0 +1,4 @@
+channel_targets:
+  - conda-forge colmap_dev
+channel_sources:
+  - conda-forge/label/colmap_dev,conda-forge

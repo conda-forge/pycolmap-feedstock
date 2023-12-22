@@ -1,0 +1,152 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d8a2ce2..344c035 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,5 +1,5 @@
+ cmake_minimum_required(VERSION 3.10)
+-project(${SKBUILD_PROJECT_NAME} VERSION ${SKBUILD_PROJECT_VERSION})
++project(PyCOLMAP)
+ 
+ set(CMAKE_CUDA_ARCHITECTURES "native")
+ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+diff --git a/pyproject.toml b/pyproject.toml
+deleted file mode 100644
+index 4467d12..0000000
+--- a/pyproject.toml
++++ /dev/null
+@@ -1,41 +0,0 @@
+-[build-system]
+-requires = ["scikit-build-core>=0.3.3", "pybind11==2.11.1"]
+-build-backend = "scikit_build_core.build"
+-
+-
+-[project]
+-name = "pycolmap"
+-version = "0.5.0"
+-description="COLMAP bindings"
+-readme = "README.md"
+-authors = [
+-  { name = "Mihai Dusmanu", email = "mihai.dusmanu@microsoft.com" },
+-  { name = "Paul-Edouard Sarlin", email = "psarlin@ethz.ch" },
+-  { name = "Philipp Lindenberger", email = "plindenbe@ethz.ch" },
+-]
+-license = {file = "LICENSE"}
+-urls = {Repository = "https://github.com/colmap/pycolmap"}
+-requires-python = ">=3.7"
+-dependencies = ["numpy"]
+-classifiers = [
+-  "License :: OSI Approved :: BSD License",
+-  "Programming Language :: Python :: 3 :: Only",
+-]
+-
+-
+-[tool.scikit-build]
+-wheel.expand-macos-universal-tags = true
+-
+-
+-[tool.cibuildwheel]
+-build = "cp3{8,9,10,11}-{macosx,manylinux}*"
+-archs = ["auto64"]
+-test-command = "python -c 'import pycolmap; print(pycolmap.__version__)'"
+-
+-[tool.cibuildwheel.linux]
+-before-all = "./package/install-colmap-centos.sh"
+-config-settings = "cmake.define.EIGEN3_INCLUDE_DIRS=eigen"
+-
+-[tool.cibuildwheel.macos]
+-before-all = "./package/install-colmap-macos.sh"
+-config-settings = { "cmake.define.BOOSTROOT" = "boost_install", "cmake.define.Boost_NO_SYSTEM_PATHS" = "ON" }
+diff --git a/setup.py b/setup.py
+new file mode 100644
+index 0000000..8baf096
+--- /dev/null
++++ b/setup.py
+@@ -0,0 +1,87 @@
++""" Author: Mihai-Dusmanu (mihaidusmanu) """
++
++import os
++import os.path
++import re
++import sys
++import platform
++import subprocess
++from pathlib import Path
++
++from setuptools import setup, Extension
++from setuptools.command.build_ext import build_ext
++from distutils.version import LooseVersion
++
++
++class CMakeExtension(Extension):
++    def __init__(self, name, sourcedir=''):
++        Extension.__init__(self, name, sources=[])
++        self.sourcedir = os.path.abspath(sourcedir)
++
++
++class CMakeBuild(build_ext):
++    def run(self):
++        try:
++            out = subprocess.check_output(['cmake', '--version'])
++        except OSError:
++            raise RuntimeError("CMake must be installed to build the following extensions: " +
++                               ", ".join(e.name for e in self.extensions))
++
++        if platform.system() == "Windows":
++            cmake_version = LooseVersion(re.search(r'version\s*([\d.]+)', out.decode()).group(1))
++            if cmake_version < '3.1.0':
++                raise RuntimeError("CMake >= 3.1.0 is required on Windows")
++
++        for ext in self.extensions:
++            self.build_extension(ext)
++
++    def build_extension(self, ext):
++        extdir = os.path.abspath(os.path.dirname(self.get_ext_fullpath(ext.name)))
++        cmake_args = [
++            '-DCMAKE_LIBRARY_OUTPUT_DIRECTORY=' + extdir,
++            '-DPython_EXECUTABLE=' + sys.executable,
++            '-DVERSION_INFO={}'.format(self.distribution.get_version()),
++            '-DCMAKE_BUILD_TYPE=Release',
++        ]
++        eigen_dir = os.environ.get('EIGEN3_INCLUDE_DIRS')
++        if eigen_dir is not None:
++            cmake_args += ['-DEIGEN3_INCLUDE_DIRS={}'.format(eigen_dir)]
++        qt5_dir = os.environ.get("Qt5_DIR")
++        if qt5_dir is not None:
++            cmake_args += ['-DQt5_DIR={}'.format(qt5_dir)]
++
++        cfg = 'Debug' if self.debug else 'Release'
++        build_args = ['--config', cfg]
++
++        if platform.system() == "Windows":
++            cmake_args += ['-G Ninja']
++        else:
++            cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
++            build_args += ['--', '-j2']
++
++        env = os.environ.copy()
++        env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(
++            env.get('CXXFLAGS', ''),
++            self.distribution.get_version()
++        )
++        if not os.path.exists(self.build_temp):
++            os.makedirs(self.build_temp)
++        print(['cmake', ext.sourcedir] + cmake_args)
++        subprocess.check_call(['cmake', ext.sourcedir] + cmake_args, cwd=self.build_temp, env=env)
++        subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=self.build_temp)
++
++
++long_description = (Path(__file__).parent / 'README.md').read_text()
++
++setup(
++    name='pycolmap',
++    version='0.5.0',
++    author='Mihai Dusmanu',
++    author_email='mihai.dusmanu@inf.ethz.ch',
++    description='COLMAP bindings',
++    long_description=long_description,
++    long_description_content_type='text/markdown',
++    ext_modules=[CMakeExtension('colmap')],
++    cmdclass=dict(build_ext=CMakeBuild),
++    zip_safe=False,
++)
+\ No newline at end of file
