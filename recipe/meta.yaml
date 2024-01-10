@@ -11,10 +11,9 @@ source:
     sha256: 0fa8b72e54825a113aed4ea9ad67ab50e80851645c81be5672ff2123e4fa4e76
     patches:
       - 214.patch
-      - setuptools-build.patch  # [win and cuda_compiler_version not in (undefined, "None")]
 
 build:
-  number: 0
+  number: 1
   script: {{ PYTHON }} -m pip install . -vv --no-build-isolation
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version not in (undefined, "None")]
   string: cpu_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version in (undefined, "None")]
