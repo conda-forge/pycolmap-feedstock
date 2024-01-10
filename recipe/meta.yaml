@@ -1,6 +1,6 @@
 {% set name = "pycolmap" %}
-{% set version = "0.5.0.2023.12.20" %}
-{% set commit_sha = "bb1732139c800ddf5336bdfc9e5e24053351d47d" %} 
+{% set version = "0.5.0.2024.01.11" %}
+{% set commit_sha = "7a5888c03a7d67a7630ad65867597298eb2e9b57" %} 
 
 package:
   name: {{ name }}
@@ -9,8 +9,6 @@ package:
 source:
   - url: https://github.com/colmap/{{ name }}/archive/{{ commit_sha }}.tar.gz
     sha256: 0fa8b72e54825a113aed4ea9ad67ab50e80851645c81be5672ff2123e4fa4e76
-    patches:
-      - 214.patch
 
 build:
   number: 1
