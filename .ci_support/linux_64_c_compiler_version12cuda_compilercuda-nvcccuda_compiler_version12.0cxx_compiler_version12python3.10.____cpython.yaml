@@ -5,7 +5,7 @@ c_compiler_version:
 cdt_name:
 - cos7
 channel_sources:
-- conda-forge/label/colmap_dev,conda-forge
+- conda-forge
 channel_targets:
 - conda-forge colmap_dev
 cuda_compiler:
@@ -34,6 +34,8 @@ libboost_devel:
 - '1.82'
 libcblas:
 - 3.9 *netlib
+lz4_c:
+- 1.9.3
 metis:
 - 5.1.1
 pin_run_as_build:
