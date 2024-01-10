@@ -8,7 +8,9 @@ package:
 
 source:
   - url: https://github.com/colmap/{{ name }}/archive/{{ commit_sha }}.tar.gz
-    sha256: 0fa8b72e54825a113aed4ea9ad67ab50e80851645c81be5672ff2123e4fa4e76
+    sha256: 5a4a090da2475496f77e672cfb90d3e64fb2f92d62c62ff0276262e40a884951
+    patches:
+      - use-ninja.patch
 
 build:
   number: 1
