@@ -16,8 +16,8 @@ build:
   number: 1
   script:
     - set CMAKE_BUILD_TYPE=Release  # [win]
-    - set CMAKE_ARGS=-G Ninja -DCMAKE_BUILD_TYPE=Release  # [win]
-    - {{ PYTHON }} -m pip install . -vv --no-build-isolation --build-type Release
+    - set CMAKE_ARGS=-G Ninja  # [win]
+    - {{ PYTHON }} -m pip install . -vv --no-build-isolation
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version not in (undefined, "None")]
   string: cpu_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version in (undefined, "None")]
   skip: true  # [win and cuda_compiler_version == "11.2"]
