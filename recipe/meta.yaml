@@ -1,6 +1,6 @@
 {% set name = "pycolmap" %}
-{% set version = "0.5.0.2023.12.20" %}
-{% set commit_sha = "bb1732139c800ddf5336bdfc9e5e24053351d47d" %} 
+{% set version = "0.5.0.2024.01.11" %}
+{% set commit_sha = "7a5888c03a7d67a7630ad65867597298eb2e9b57" %} 
 
 package:
   name: {{ name }}
@@ -8,14 +8,16 @@ package:
 
 source:
   - url: https://github.com/colmap/{{ name }}/archive/{{ commit_sha }}.tar.gz
-    sha256: 0fa8b72e54825a113aed4ea9ad67ab50e80851645c81be5672ff2123e4fa4e76
+    sha256: 5a4a090da2475496f77e672cfb90d3e64fb2f92d62c62ff0276262e40a884951
     patches:
-      - 214.patch
-      - setuptools-build.patch  # [win and cuda_compiler_version not in (undefined, "None")]
+      - relax-version.patch
 
 build:
-  number: 0
-  script: {{ PYTHON }} -m pip install . -vv --no-build-isolation
+  number: 1
+  script:
+    - set CMAKE_BUILD_TYPE=Release  # [win]
+    - set CMAKE_ARGS=-G Ninja  # [win]
+    - {{ PYTHON }} -m pip install . -vv --no-build-isolation
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version not in (undefined, "None")]
   string: cpu_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version in (undefined, "None")]
   skip: true  # [win and cuda_compiler_version == "11.2"]

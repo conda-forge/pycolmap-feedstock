@@ -1,13 +1,13 @@
 c_compiler:
 - vs2019
 channel_sources:
-- conda-forge/label/colmap_dev,conda-forge
+- conda-forge
 channel_targets:
 - conda-forge colmap_dev
 cuda_compiler:
-- nvcc
+- None
 cuda_compiler_version:
-- '11.8'
+- None
 cxx_compiler:
 - vs2019
 flann:
@@ -24,6 +24,8 @@ libboost_devel:
 - '1.82'
 libcblas:
 - 3.9 *netlib
+lz4_c:
+- 1.9.3
 metis:
 - 5.1.1
 pin_run_as_build:
@@ -33,7 +35,7 @@ pin_run_as_build:
     min_pin: x.x
     max_pin: x.x
 python:
-- 3.8.* *_cpython
+- 3.11.* *_cpython
 qt_main:
 - '5.15'
 sqlite:
