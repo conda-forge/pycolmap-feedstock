@@ -32,6 +32,8 @@ libcblas:
 - 3.9 *netlib
 llvm_openmp:
 - '16'
+lz4_c:
+- 1.9.3
 macos_machine:
 - x86_64-apple-darwin13.4.0
 metis:
