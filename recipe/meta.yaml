@@ -1,19 +1,16 @@
 {% set name = "pycolmap" %}
-{% set version = "0.5.0.2024.01.11" %}
-{% set commit_sha = "7a5888c03a7d67a7630ad65867597298eb2e9b57" %} 
+{% set version = "0.5.0" %}
 
 package:
   name: {{ name }}
   version: {{ version }}
 
 source:
-  - url: https://github.com/colmap/{{ name }}/archive/{{ commit_sha }}.tar.gz
-    sha256: 5a4a090da2475496f77e672cfb90d3e64fb2f92d62c62ff0276262e40a884951
-    patches:
-      - relax-version.patch
+  - url: https://github.com/colmap/{{ name }}/archive/v{{ version }}.tar.gz
+    sha256: 2e292f7693367c85d3ba42784d57bcdc8614677732ed5d386de66aba53f2e76a
 
 build:
-  number: 1
+  number: 0
   script:
     - set CMAKE_BUILD_TYPE=Release  # [win]
     - set CMAKE_ARGS=-G Ninja  # [win]
