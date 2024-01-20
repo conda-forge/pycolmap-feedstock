@@ -10,7 +10,7 @@ source:
     sha256: 2e292f7693367c85d3ba42784d57bcdc8614677732ed5d386de66aba53f2e76a
 
 build:
-  number: 0
+  number: 1
   script:
     - set CMAKE_BUILD_TYPE=Release  # [win]
     - set CMAKE_ARGS=-G Ninja  # [win]
@@ -56,7 +56,7 @@ requirements:
     - scikit-build-core
     - pybind11
     - libboost-devel
-    - colmap
+    - colmap 3.9
     - libblas
     - libcblas
     - cgal-cpp
