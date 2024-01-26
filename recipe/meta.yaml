@@ -1,5 +1,5 @@
 {% set name = "pycolmap" %}
-{% set version = "0.6.0" %}
+{% set version = "0.6.1" %}
 
 package:
   name: {{ name }}
@@ -7,7 +7,7 @@ package:
 
 source:
   - url: https://github.com/colmap/{{ name }}/archive/v{{ version }}.tar.gz
-    sha256: 06ce5d63bb13475f8a443549eb1d6983c7d9f21b92784df4edde9e7ba66c5fcc
+    sha256: 7a8d5a4e0813c44f726c9f7bed1916ce597b7bdce1f9345658e146ac7636407a
 
 build:
   number: 0
