@@ -10,7 +10,7 @@ source:
     sha256: 7a8d5a4e0813c44f726c9f7bed1916ce597b7bdce1f9345658e146ac7636407a
 
 build:
-  number: 1
+  number: 2
   script:
     - set CMAKE_BUILD_TYPE=Release  # [win]
     - set CMAKE_ARGS=-G Ninja  # [win]
@@ -26,6 +26,7 @@ requirements:
   build:
     - {{ compiler('cxx') }}
     - {{ compiler('c') }}
+    - {{ stdlib("c") }}
     - {{ compiler('cuda') }}                 # [cuda_compiler_version not in (undefined, "None")]
     - cmake
     - make                                   # [unix]
@@ -46,7 +47,6 @@ requirements:
     - {{ cdt('libxext') }}                   # [linux]
     - {{ cdt('libxau') }}                    # [linux]
     - {{ cdt('expat-devel') }}               # [linux]
-    - sysroot_linux-64 2.17                  # [linux64]
     - llvm-openmp                            # [osx]
     - libgomp                                # [linux]
   host:
