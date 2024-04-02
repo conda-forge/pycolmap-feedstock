@@ -8,14 +8,13 @@ package:
 source:
   - url: https://github.com/colmap/{{ name }}/archive/v{{ version }}.tar.gz
     sha256: 7a8d5a4e0813c44f726c9f7bed1916ce597b7bdce1f9345658e146ac7636407a
-    patches:
-      - fix-win-cuda.patch
 
 build:
   number: 2
   script:
     - set CMAKE_BUILD_TYPE=Release  # [win]
     - set CMAKE_ARGS=-G Ninja  # [win]
+    - set CUDAFLAGS=--use-local-env  # [win]
     - {{ PYTHON }} -m pip install . -vv --no-build-isolation
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version not in (undefined, "None")]
   string: cpu_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version in (undefined, "None")]
