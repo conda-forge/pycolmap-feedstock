@@ -15,7 +15,7 @@ source:
       - fix-cuda-link.patch
 
 build:
-  number: 6
+  number: 7
   script: {{ PYTHON }} -m pip install . -vv
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version not in (undefined, "None")]
   string: cpu_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version in (undefined, "None")]
@@ -53,7 +53,7 @@ requirements:
     - python
     - pybind11
     - libboost-devel
-    - colmap
+    -   
     - libblas
     - libcblas
     - cgal-cpp
