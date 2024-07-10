@@ -53,7 +53,7 @@ requirements:
     - python
     - pybind11
     - libboost-devel
-    -   
+    - colmap 3.8
     - libblas
     - libcblas
     - cgal-cpp
