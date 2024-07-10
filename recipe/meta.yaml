@@ -27,6 +27,7 @@ requirements:
   build:
     - {{ compiler('cxx') }}
     - {{ compiler('c') }}
+    - {{ stdlib("c") }}
     - {{ compiler('cuda') }}                 # [cuda_compiler_version not in (undefined, "None")]
     - cmake
     - make                                   # [unix]
