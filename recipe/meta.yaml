@@ -11,12 +11,11 @@ source:
     patches:
       - use-conda-pybind11.patch
       - fix-win-build.patch
-      - fix-pybind11.patch
       - fix-cuda-link.patch
 
 build:
   number: 7
-  script: {{ PYTHON }} -m pip install . -vv
+  script: {{ PYTHON }} -m pip install . -vv --no-build-isolation
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version not in (undefined, "None")]
   string: cpu_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version in (undefined, "None")]
   # weigh down cpu implementation and give cuda preference
