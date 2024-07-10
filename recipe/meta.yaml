@@ -71,6 +71,7 @@ requirements:
     - qt-main
     - mpir                                   # [win]
     - cuda-cudart-dev                        # [(cuda_compiler_version or "").startswith("12")]
+    - lz4-c
   run:
     - python
     - flann
@@ -83,6 +84,7 @@ test:
     - pycolmap
   commands:
     - pip check
+    - python -c "import pycolmap; reconstruction = pycolmap.Reconstruction(); x = reconstruction.points3D"
   requires:
     - pip
 
