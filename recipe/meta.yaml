@@ -11,12 +11,11 @@ source:
     patches:
       - use-conda-pybind11.patch
       - fix-win-build.patch
-      - fix-pybind11.patch
       - fix-cuda-link.patch
 
 build:
-  number: 6
-  script: {{ PYTHON }} -m pip install . -vv
+  number: 7
+  script: {{ PYTHON }} -m pip install . -vv --no-build-isolation
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version not in (undefined, "None")]
   string: cpu_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version in (undefined, "None")]
   # weigh down cpu implementation and give cuda preference
@@ -27,6 +26,7 @@ requirements:
   build:
     - {{ compiler('cxx') }}
     - {{ compiler('c') }}
+    - {{ stdlib("c") }}
     - {{ compiler('cuda') }}                 # [cuda_compiler_version not in (undefined, "None")]
     - cmake
     - make                                   # [unix]
@@ -45,7 +45,6 @@ requirements:
     - {{ cdt('libxext') }}                   # [linux]
     - {{ cdt('libxau') }}                    # [linux]
     - {{ cdt('expat-devel') }}               # [linux]
-    - sysroot_linux-64 2.17                  # [linux64]
     - llvm-openmp                            # [osx]
     - libgomp                                # [linux]
   host:
@@ -53,7 +52,7 @@ requirements:
     - python
     - pybind11
     - libboost-devel
-    - colmap
+    - colmap 3.8
     - libblas
     - libcblas
     - cgal-cpp
@@ -71,6 +70,7 @@ requirements:
     - qt-main
     - mpir                                   # [win]
     - cuda-cudart-dev                        # [(cuda_compiler_version or "").startswith("12")]
+    - lz4-c
   run:
     - python
     - flann
@@ -83,6 +83,7 @@ test:
     - pycolmap
   commands:
     - pip check
+    - python -c "import pycolmap; reconstruction = pycolmap.Reconstruction(); x = reconstruction.points3D"
   requires:
     - pip
 
