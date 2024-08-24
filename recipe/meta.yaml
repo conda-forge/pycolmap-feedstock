@@ -14,7 +14,7 @@ source:
       - fix-cuda-link.patch
 
 build:
-  number: 9
+  number: 10
   script: {{ PYTHON }} -m pip install . -vv --no-build-isolation
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version not in (undefined, "None")]
   string: cpu_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version in (undefined, "None")]
@@ -49,6 +49,7 @@ requirements:
     - libgomp                                # [linux]
   host:
     - pip
+    - setuptools
     - python
     - pybind11
     - libboost-devel
