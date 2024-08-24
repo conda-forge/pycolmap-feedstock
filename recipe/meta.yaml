@@ -49,6 +49,7 @@ requirements:
     - libgomp                                # [linux]
   host:
     - pip
+    - setuptools
     - python
     - pybind11
     - libboost-devel
