@@ -14,7 +14,7 @@ source:
       - fix-cuda-link.patch
 
 build:
-  number: 10
+  number: 11
   script: {{ PYTHON }} -m pip install . -vv --no-build-isolation
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version not in (undefined, "None")]
   string: cpu_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version in (undefined, "None")]
@@ -69,7 +69,7 @@ requirements:
     - vlfeat                                 # [unix]
     - gmp                                    # [unix]
     - qt-main
-    - mpir                                   # [win]
+    - gmp                                   # [win]
     - cuda-cudart-dev                        # [(cuda_compiler_version or "").startswith("12")]
     - lz4-c
   run:
