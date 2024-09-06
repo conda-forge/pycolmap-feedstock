@@ -1,5 +1,5 @@
-{% set name = "pycolmap" %}
-{% set version = "0.6.1" %}
+{% set name = "colmap" %}
+{% set version = "3.10" %}
 
 package:
   name: {{ name }}
