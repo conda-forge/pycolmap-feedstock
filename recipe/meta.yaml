@@ -1,13 +1,16 @@
-{% set name = "colmap" %}
+{% set name = "pycolmap" %}
 {% set version = "3.10" %}
+{% set source_repo = "colmap/colmap" %}
 
 package:
   name: {{ name }}
   version: {{ version }}
 
 source:
-  - url: https://github.com/colmap/{{ name }}/archive/v{{ version }}.tar.gz
-    sha256: 7a8d5a4e0813c44f726c9f7bed1916ce597b7bdce1f9345658e146ac7636407a
+  - git_url: https://github.com/{{ source_repo }}.git
+    git_tag: release/{{ version }}
+  # - url: https://github.com/{{ source_repo }}/archive/v{{ version }}.tar.gz
+  #   sha256: e3b0c44298fc1c149afbf4c8996fb92427cae41e4649b934ca495991b7852b855
 
 build:
   number: 2
@@ -57,7 +60,7 @@ requirements:
     - scikit-build-core
     - pybind11 2.11
     - libboost-devel
-    - colmap 3.9
+    - colmap {{ version }}
     - libblas
     - libcblas
     - cgal-cpp
