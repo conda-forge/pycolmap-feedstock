@@ -1,16 +1,13 @@
 {% set name = "pycolmap" %}
 {% set version = "3.10" %}
-{% set source_repo = "colmap/colmap" %}
 
 package:
   name: {{ name }}
   version: {{ version }}
 
 source:
-  - git_url: https://github.com/{{ source_repo }}.git
-    git_tag: release/{{ version }}
-  # - url: https://github.com/{{ source_repo }}/archive/v{{ version }}.tar.gz
-  #   sha256: e3b0c44298fc1c149afbf4c8996fb92427cae41e4649b934ca495991b7852b855
+  - url: https://github.com/colmap/colmap/archive/{{ version }}.tar.gz
+    sha256: 61850f323e201ab6a1abbfb0e4a8b3ba1c4cedbf55e0a5716bdea1df8ae1813a
 
 build:
   number: 2
