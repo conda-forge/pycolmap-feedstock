@@ -1,20 +1,21 @@
 {% set name = "pycolmap" %}
-{% set version = "0.6.1" %}
+{% set version = "3.10" %}
 
 package:
   name: {{ name }}
   version: {{ version }}
 
 source:
-  - url: https://github.com/colmap/{{ name }}/archive/v{{ version }}.tar.gz
-    sha256: 7a8d5a4e0813c44f726c9f7bed1916ce597b7bdce1f9345658e146ac7636407a
+  - url: https://github.com/colmap/colmap/archive/{{ version }}.tar.gz
+    sha256: 61850f323e201ab6a1abbfb0e4a8b3ba1c4cedbf55e0a5716bdea1df8ae1813a
 
 build:
-  number: 2
+  number: 0
   script:
     - set CMAKE_BUILD_TYPE=Release  # [win]
     - set CMAKE_ARGS=-G Ninja  # [win]
     - set CUDAFLAGS=--use-local-env  # [win]
+    - cd pycolmap
     - {{ PYTHON }} -m pip install . -vv --no-build-isolation
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version not in (undefined, "None")]
   string: cpu_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version in (undefined, "None")]
@@ -34,7 +35,7 @@ requirements:
     - ninja
     - python                                 # [build_platform != target_platform]
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
-    - pybind11 2.11                          # [build_platform != target_platform]
+    - pybind11                               # [build_platform != target_platform]
     - scikit-build                           # [build_platform != target_platform]
     - scikit-build-core                      # [build_platform != target_platform]
     # x11 stuff
@@ -55,9 +56,9 @@ requirements:
     - python
     - scikit-build
     - scikit-build-core
-    - pybind11 2.11
+    - pybind11
     - libboost-devel
-    - colmap 3.9
+    - colmap {{ version }}
     - libblas
     - libcblas
     - cgal-cpp
@@ -79,8 +80,6 @@ requirements:
     - libcurand-dev                          # [(cuda_compiler_version or "").startswith("12")]
   run:
     - python
-    - flann
-    - vlfeat
     - numpy
     - __cuda >={{ cuda_compiler_version }}   # [cuda_compiler_version not in (undefined, "None")]
 
@@ -97,7 +96,7 @@ about:
   home: https://colmap.github.io/
   license: BSD-3-Clause
   license_file:
-    - LICENSE
+    - COPYING.txt
   summary: pycolmap exposes to Python most COLMAP reconstruction objects, such as Cameras and Points3D, as well as estimators for absolute and relative poses.
 
 extra:
