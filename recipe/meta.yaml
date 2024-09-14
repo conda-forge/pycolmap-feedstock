@@ -80,8 +80,6 @@ requirements:
     - libcurand-dev                          # [(cuda_compiler_version or "").startswith("12")]
   run:
     - python
-    - flann
-    - vlfeat
     - numpy
     - __cuda >={{ cuda_compiler_version }}   # [cuda_compiler_version not in (undefined, "None")]
 
@@ -98,7 +96,7 @@ about:
   home: https://colmap.github.io/
   license: BSD-3-Clause
   license_file:
-    - LICENSE
+    - COPYING.txt
   summary: pycolmap exposes to Python most COLMAP reconstruction objects, such as Cameras and Points3D, as well as estimators for absolute and relative poses.
 
 extra:
