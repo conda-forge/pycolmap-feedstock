@@ -1,8 +1,6 @@
 azure:
   free_disk_space: true
 bot:
-  abi_migration_branches:
-  - 0.4.0
   automerge: true
 build_platform:
   linux_aarch64: linux_64
@@ -11,6 +9,4 @@ conda_forge_output_validation: true
 github:
   branch_name: main
   tooling_branch_name: main
-os_version:
-  linux_64: cos7
 test: native_and_emulated
