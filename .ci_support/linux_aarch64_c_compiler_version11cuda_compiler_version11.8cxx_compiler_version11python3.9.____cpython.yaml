@@ -3,7 +3,7 @@ BUILD:
 c_compiler:
 - gcc
 c_compiler_version:
-- '12'
+- '11'
 c_stdlib:
 - sysroot
 c_stdlib_version:
@@ -17,15 +17,15 @@ channel_sources:
 channel_targets:
 - conda-forge main
 cuda_compiler:
-- cuda-nvcc
+- nvcc
 cuda_compiler_version:
-- '12.0'
+- '11.8'
 cxx_compiler:
 - gxx
 cxx_compiler_version:
-- '12'
+- '11'
 docker_image:
-- quay.io/condaforge/linux-anvil-cos7-x86_64
+- quay.io/condaforge/linux-anvil-cuda:11.8
 flann:
 - 1.9.2
 gflags:
@@ -53,7 +53,7 @@ pin_run_as_build:
   vlfeat:
     max_pin: x.x.x
 python:
-- 3.11.* *_cpython
+- 3.9.* *_cpython
 qt_main:
 - '5.15'
 sqlite:
@@ -70,3 +70,5 @@ zip_keys:
   - cuda_compiler
   - cuda_compiler_version
   - docker_image
+- - python
+  - channel_sources
