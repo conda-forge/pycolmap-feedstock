@@ -10,7 +10,7 @@ source:
     sha256: 61850f323e201ab6a1abbfb0e4a8b3ba1c4cedbf55e0a5716bdea1df8ae1813a
 
 build:
-  number: 2
+  number: 3
   script:
     - set CMAKE_BUILD_TYPE=Release  # [win]
     - set CMAKE_ARGS=-G Ninja  # [win]
@@ -74,7 +74,7 @@ requirements:
     - vlfeat                                 # [unix]
     - gmp                                    # [unix]
     - qt-main
-    - mpir                                   # [win]
+    - gmp                                   # [win]
     - lz4-c
     - cuda-cudart-dev {{ cuda_compiler_version }}  # [(cuda_compiler_version or "").startswith("12")]
     - libcurand-dev                          # [(cuda_compiler_version or "").startswith("12")]
