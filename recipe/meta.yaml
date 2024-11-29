@@ -37,6 +37,7 @@ requirements:
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
     - pybind11                               # [build_platform != target_platform]
     - pybind11-stubgen                       # [build_platform != target_platform]
+    - numpy                                  # [build_platform != target_platform]
     - scikit-build                           # [build_platform != target_platform]
     - scikit-build-core                      # [build_platform != target_platform]
     # x11 stuff
@@ -59,6 +60,7 @@ requirements:
     - scikit-build-core
     - pybind11
     - pybind11-stubgen
+    - numpy
     - libboost-devel
     - colmap {{ version }}
     - libblas
