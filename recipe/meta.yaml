@@ -16,7 +16,7 @@ build:
   number: 0
   script:
     - set CMAKE_BUILD_TYPE=Release  # [win]
-    - set CMAKE_ARGS=-G Ninja  # [win]
+    - set CMAKE_ARGS=-G Ninja -j1  # [win]
     - set CUDAFLAGS=--use-local-env  # [win]
     - CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"  # [osx]
     - cd pycolmap
