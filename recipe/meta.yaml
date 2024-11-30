@@ -9,7 +9,7 @@ source:
   - url: https://github.com/colmap/colmap/archive/{{ version }}.tar.gz
     sha256: 8da471b0f5baa3bdd940f1778ffe338738eb47b90b4d03dcd8da6b9810014844
     patches:
-      - do-not-generate-stubs.patch  # [linux and aarch64]
+      - do-not-generate-stubs.patch  # [build_platform != target_platform]
       - disable-parallel-builds.patch  # [win]
 
 build:
@@ -19,7 +19,6 @@ build:
     - set CMAKE_ARGS=-G Ninja  # [win]
     - set CUDAFLAGS=--use-local-env  # [win]
     - CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"  # [osx]
-    - export CMAKE_OSX_ARCHITECTURES="arm64"  # [osx and arm64]
     - cd pycolmap
     - {{ PYTHON }} -m pip install . -vv --no-build-isolation
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version not in (undefined, "None")]
