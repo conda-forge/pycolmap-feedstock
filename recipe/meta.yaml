@@ -10,6 +10,7 @@ source:
     sha256: 8da471b0f5baa3bdd940f1778ffe338738eb47b90b4d03dcd8da6b9810014844
     patches:
       - do-not-generate-stubs.patch  # [linux and aarch64]
+      - disable-parallel-builds.patch  # [win]
 
 build:
   number: 0
