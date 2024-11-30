@@ -8,6 +8,8 @@ package:
 source:
   - url: https://github.com/colmap/colmap/archive/{{ version }}.tar.gz
     sha256: 8da471b0f5baa3bdd940f1778ffe338738eb47b90b4d03dcd8da6b9810014844
+    patches:
+      - do-not-generate-stubs.patch  # [linux and aarch64]
 
 build:
   number: 0
