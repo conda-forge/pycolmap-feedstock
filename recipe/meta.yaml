@@ -16,6 +16,7 @@ build:
     - set CMAKE_ARGS=-G Ninja  # [win]
     - set CUDAFLAGS=--use-local-env  # [win]
     - CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"  # [osx]
+    - export CMAKE_OSX_ARCHITECTURES="arm64"  # [osx and arm64]
     - cd pycolmap
     - {{ PYTHON }} -m pip install . -vv --no-build-isolation
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version not in (undefined, "None")]
