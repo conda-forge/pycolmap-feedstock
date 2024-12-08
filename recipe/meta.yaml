@@ -85,6 +85,7 @@ requirements:
     - glew
     - vlfeat                                 # [unix]
     - gmp                                    # [unix]
+    - m2-gmp                                 # [win]
     - qt-main
     - mpir                                   # [win]
     - lz4-c
