@@ -1,5 +1,5 @@
 {% set name = "pycolmap" %}
-{% set version = "3.10" %}
+{% set version = "3.11.0" %}
 
 package:
   name: {{ name }}
@@ -7,14 +7,19 @@ package:
 
 source:
   - url: https://github.com/colmap/colmap/archive/{{ version }}.tar.gz
-    sha256: 61850f323e201ab6a1abbfb0e4a8b3ba1c4cedbf55e0a5716bdea1df8ae1813a
+    sha256: 8da471b0f5baa3bdd940f1778ffe338738eb47b90b4d03dcd8da6b9810014844
+    patches:
+      - do-not-generate-stubs.patch  # [build_platform != target_platform]
+      - disable-parallel-builds.patch  # [win]
 
 build:
-  number: 2
+  number: 0
   script:
     - set CMAKE_BUILD_TYPE=Release  # [win]
     - set CMAKE_ARGS=-G Ninja  # [win]
+    - set CMAKE_BUILD_PARALLEL_LEVEL=1  # [win]
     - set CUDAFLAGS=--use-local-env  # [win]
+    - CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"  # [osx]
     - cd pycolmap
     - {{ PYTHON }} -m pip install . -vv --no-build-isolation
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version not in (undefined, "None")]
@@ -36,6 +41,8 @@ requirements:
     - python                                 # [build_platform != target_platform]
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
     - pybind11                               # [build_platform != target_platform]
+    - pybind11-stubgen                       # [build_platform != target_platform]
+    - numpy                                  # [build_platform != target_platform]
     - scikit-build                           # [build_platform != target_platform]
     - scikit-build-core                      # [build_platform != target_platform]
     # x11 stuff
@@ -57,6 +64,11 @@ requirements:
     - scikit-build
     - scikit-build-core
     - pybind11
+    - pybind11-stubgen
+    - numpy
+    - ruff
+    - black
+    - isort
     - libboost-devel
     - colmap {{ version }}
     - libblas
@@ -72,9 +84,8 @@ requirements:
     - ceres-solver
     - glew
     - vlfeat                                 # [unix]
-    - gmp                                    # [unix]
+    - gmp
     - qt-main
-    - mpir                                   # [win]
     - lz4-c
     - cuda-cudart-dev {{ cuda_compiler_version }}  # [(cuda_compiler_version or "").startswith("12")]
     - libcurand-dev                          # [(cuda_compiler_version or "").startswith("12")]
