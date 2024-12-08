@@ -86,7 +86,6 @@ requirements:
     - vlfeat                                 # [unix]
     - gmp
     - qt-main
-    - mpir                                   # [win]
     - lz4-c
     - cuda-cudart-dev {{ cuda_compiler_version }}  # [(cuda_compiler_version or "").startswith("12")]
     - libcurand-dev                          # [(cuda_compiler_version or "").startswith("12")]
