@@ -38,8 +38,8 @@ requirements:
     - libgomp                                # [linux]
   host:
     - pip
-    - setuptools
     - python
+    - setuptools
     - pybind11
     - libboost-devel
     - colmap 3.8
@@ -57,9 +57,8 @@ requirements:
     - libgl-devel                            # [linux]
     - glew
     - vlfeat                                 # [unix]
-    - gmp                                    # [unix]
+    - gmp
     - qt-main
-    - mpir                                   # [win]
     - cuda-cudart-dev                        # [(cuda_compiler_version or "").startswith("12")]
     - lz4-c
   run:
