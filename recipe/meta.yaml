@@ -14,7 +14,7 @@ source:
       - fix-cuda-link.patch
 
 build:
-  number: 11
+  number: 12
   script: {{ PYTHON }} -m pip install . -vv --no-build-isolation
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version not in (undefined, "None")]
   string: cpu_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version in (undefined, "None")]
@@ -34,20 +34,10 @@ requirements:
     - python                                 # [build_platform != target_platform]
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
     - pybind11                               # [build_platform != target_platform]
-    # x11 stuff
-    - {{ cdt('mesa-libgl-devel') }}          # [unix and not arm64]
-    - {{ cdt('mesa-dri-drivers') }}          # [unix and not arm64]
-    - {{ cdt('libselinux') }}                # [linux]
-    - {{ cdt('libxcb') }}                    # [linux]
-    - {{ cdt('libxdamage') }}                # [linux]
-    - {{ cdt('libxfixes') }}                 # [linux]
-    - {{ cdt('libxxf86vm') }}                # [linux]
-    - {{ cdt('libxext') }}                   # [linux]
-    - {{ cdt('libxau') }}                    # [linux]
-    - {{ cdt('expat-devel') }}               # [linux]
     - llvm-openmp                            # [osx]
     - libgomp                                # [linux]
   host:
+    - libgl-devel                            # [linux]
     - pip
     - setuptools
     - python
@@ -67,9 +57,8 @@ requirements:
     - ceres-solver
     - glew
     - vlfeat                                 # [unix]
-    - gmp                                    # [unix]
+    - gmp
     - qt-main
-    - mpir                                   # [win]
     - cuda-cudart-dev                        # [(cuda_compiler_version or "").startswith("12")]
     - lz4-c
   run:
