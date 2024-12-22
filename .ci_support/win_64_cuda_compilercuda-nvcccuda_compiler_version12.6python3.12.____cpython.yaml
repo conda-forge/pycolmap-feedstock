@@ -3,13 +3,13 @@ c_compiler:
 c_stdlib:
 - vs
 channel_sources:
-- conda-forge/label/python_rc,conda-forge
+- conda-forge
 channel_targets:
 - conda-forge main
 cuda_compiler:
 - cuda-nvcc
 cuda_compiler_version:
-- '12.0'
+- '12.6'
 cxx_compiler:
 - vs2019
 flann:
@@ -35,7 +35,7 @@ pin_run_as_build:
     min_pin: x.x
     max_pin: x.x
 python:
-- 3.13.* *_cp313
+- 3.12.* *_cpython
 qt_main:
 - '5.15'
 sqlite:
@@ -45,5 +45,3 @@ target_platform:
 zip_keys:
 - - cuda_compiler
   - cuda_compiler_version
-- - python
-  - channel_sources

@@ -3,7 +3,7 @@ c_compiler:
 c_stdlib:
 - vs
 channel_sources:
-- conda-forge/label/python_rc,conda-forge
+- conda-forge
 channel_targets:
 - conda-forge main
 cuda_compiler:
@@ -45,5 +45,3 @@ target_platform:
 zip_keys:
 - - cuda_compiler
   - cuda_compiler_version
-- - python
-  - channel_sources
