@@ -67,7 +67,7 @@ requirements:
     - ceres-solver
     - glew
     - vlfeat                                 # [unix]
-    - gmp                                    # [unix]
+    - gmp
     - qt-main
     - mpir                                   # [win]
     - cuda-cudart-dev                        # [(cuda_compiler_version or "").startswith("12")]
