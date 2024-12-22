@@ -59,7 +59,6 @@ requirements:
     - vlfeat                                 # [unix]
     - gmp
     - qt-main
-    - mpir                                   # [win]
     - cuda-cudart-dev                        # [(cuda_compiler_version or "").startswith("12")]
     - lz4-c
   run:
