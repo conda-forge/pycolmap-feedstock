@@ -9,16 +9,16 @@ source:
   - url: https://github.com/colmap/colmap/archive/{{ version }}.tar.gz
     sha256: 98aae3fbed984940a9d6f7ea93ca063c3f4eee3b4f6fff3bf6bdbf003efecfcb
     patches:
-      - do-not-generate-stubs.patch  # [build_platform != target_platform]
-      - disable-parallel-builds.patch  # [win]
+      - do-not-generate-stubs.patch      # [build_platform != target_platform]
+      - disable-parallel-builds.patch    # [win]
 
 build:
   number: 0
   script:
-    - set CMAKE_BUILD_TYPE=Release  # [win]
-    - set CMAKE_ARGS=-G Ninja  # [win]
-    - set CMAKE_BUILD_PARALLEL_LEVEL=1  # [win]
-    - set CUDAFLAGS=--use-local-env  # [win]
+    - set CMAKE_BUILD_TYPE=Release       # [win]
+    - set CMAKE_ARGS=-G Ninja            # [win]
+    - set CMAKE_BUILD_PARALLEL_LEVEL=1   # [win]
+    - set CUDAFLAGS=--use-local-env      # [win]
     - CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"  # [osx]
     - {{ PYTHON }} -m pip install . -vv --no-build-isolation
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version not in (undefined, "None")]
@@ -47,7 +47,7 @@ requirements:
     - llvm-openmp                            # [osx]
     - libgomp                                # [linux]
   host:
-    - libgl-devel  # [linux]
+    - libgl-devel                            # [linux]
     - pip
     - python
     - scikit-build
@@ -59,8 +59,8 @@ requirements:
     - black
     - isort
     - libboost-devel
-    - colmap {{ version }} cpu_*   # [cuda_compiler_version in (undefined, "None")]
-    - colmap {{ version }} cuda_*  # [cuda_compiler_version not in (undefined, "None")]
+    - colmap {{ version }} cpu_*                   # [cuda_compiler_version in (undefined, "None")]
+    - colmap {{ version }} cuda_*                  # [cuda_compiler_version not in (undefined, "None")]
     - libblas
     - libcblas
     - cgal-cpp
@@ -73,25 +73,27 @@ requirements:
     - metis
     - ceres-solver
     - glew
-    - vlfeat                                 # [unix]
+    - vlfeat                                       # [unix]
     - gmp
     - qt-main
     - lz4-c
     - cuda-cudart-dev {{ cuda_compiler_version }}  # [(cuda_compiler_version or "").startswith("12")]
-    - libcurand-dev                          # [(cuda_compiler_version or "").startswith("12")]
+    - libcurand-dev                                # [(cuda_compiler_version or "").startswith("12")]
   run:
     - python
     - numpy
-    - __cuda >={{ cuda_compiler_version }}   # [cuda_compiler_version not in (undefined, "None")]
+    - __cuda >={{ cuda_compiler_version }}         # [cuda_compiler_version not in (undefined, "None")]
 
+# aarch64 failing tests
+# /lib64/libm.so.6: version `GLIBC_2.27' not found
 test:
-  imports:
-    - pycolmap
-  commands:
-    - pip check
-    - python -c "import pycolmap; reconstruction = pycolmap.Reconstruction(); x = reconstruction.points3D"
-  requires:
-    - pip
+  imports:                                                                                                       # [not aarch64]
+    - pycolmap                                                                                                   # [not aarch64]
+  commands:                                                                                                      # [not aarch64]
+    - pip check                                                                                                  # [not aarch64]
+    - python -c "import pycolmap; reconstruction = pycolmap.Reconstruction(); x = reconstruction.points3D"       # [not aarch64]
+  requires:                                                                                                      # [not aarch64]
+    - pip                                                                                                        # [not aarch64]
 
 about:
   home: https://colmap.github.io/
