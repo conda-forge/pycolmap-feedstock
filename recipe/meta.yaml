@@ -47,7 +47,7 @@ requirements:
     - llvm-openmp                            # [osx]
     - libgomp                                # [linux]
   host:
-    - libgl-devel
+    - libgl-devel  # [linux]
     - pip
     - python
     - scikit-build
