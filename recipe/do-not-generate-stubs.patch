@@ -1,6 +1,6 @@
 diff --git a/pycolmap/CMakeLists.txt b/pycolmap/CMakeLists.txt
 index da6623b77..59aa1c6c5 100644
---- a/pthon/CMakeLists.txt
+--- a/python/CMakeLists.txt
 +++ b/python/CMakeLists.txt
 @@ -1,6 +1,6 @@
  cmake_minimum_required(VERSION 3.10)
