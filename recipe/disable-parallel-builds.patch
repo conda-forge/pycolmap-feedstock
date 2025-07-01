@@ -1,7 +1,7 @@
 diff --git a/pycolmap/CMakeLists.txt b/pycolmap/CMakeLists.txt
 index da6623b77..407e15970 100644
---- a/pycolmap/CMakeLists.txt
-+++ b/pycolmap/CMakeLists.txt
+--- a/python/CMakeLists.txt
++++ b/python/CMakeLists.txt
 @@ -14,8 +14,8 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
      add_definitions("-DNOMINMAX")
      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
