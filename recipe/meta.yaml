@@ -44,20 +44,10 @@ requirements:
     - numpy                                  # [build_platform != target_platform]
     - scikit-build                           # [build_platform != target_platform]
     - scikit-build-core                      # [build_platform != target_platform]
-    # x11 stuff
-    - {{ cdt('mesa-libgl-devel') }}          # [unix and not arm64]
-    - {{ cdt('mesa-dri-drivers') }}          # [unix and not arm64]
-    - {{ cdt('libselinux') }}                # [linux]
-    - {{ cdt('libxcb') }}                    # [linux]
-    - {{ cdt('libxdamage') }}                # [linux]
-    - {{ cdt('libxfixes') }}                 # [linux]
-    - {{ cdt('libxxf86vm') }}                # [linux]
-    - {{ cdt('libxext') }}                   # [linux]
-    - {{ cdt('libxau') }}                    # [linux]
-    - {{ cdt('expat-devel') }}               # [linux]
     - llvm-openmp                            # [osx]
     - libgomp                                # [linux]
   host:
+    - libgl-devel
     - pip
     - python
     - scikit-build
@@ -69,7 +59,8 @@ requirements:
     - black
     - isort
     - libboost-devel
-    - colmap {{ version }}
+    - colmap {{ version }} cpu_*   # [cuda_compiler_version in (undefined, "None")]
+    - colmap {{ version }} cuda_*  # [cuda_compiler_version not in (undefined, "None")]
     - libblas
     - libcblas
     - cgal-cpp
