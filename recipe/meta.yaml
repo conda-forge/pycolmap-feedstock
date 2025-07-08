@@ -1,5 +1,5 @@
 {% set name = "pycolmap" %}
-{% set version = "3.12.0" %}
+{% set version = "3.12.1" %}
 
 package:
   name: {{ name }}
@@ -7,7 +7,7 @@ package:
 
 source:
   - url: https://github.com/colmap/colmap/archive/{{ version }}.tar.gz
-    sha256: 98aae3fbed984940a9d6f7ea93ca063c3f4eee3b4f6fff3bf6bdbf003efecfcb
+    sha256: 366496caca43e73a1e61c7ebd9dee51d5b2afe15c0e75e16ebad6cfae6f2860b
     patches:
       - do-not-generate-stubs.patch      # [build_platform != target_platform]
       - disable-parallel-builds.patch    # [win]
@@ -87,12 +87,12 @@ requirements:
 # aarch64 failing tests
 # /lib64/libm.so.6: version `GLIBC_2.27' not found
 test:
-  imports:                                                                                                       # [not aarch64]
+  imports:   # [not aarch64]
     - pycolmap                                                                                                   # [not aarch64]
-  commands:                                                                                                      # [not aarch64]
+  commands:   # [not aarch64]
     - pip check                                                                                                  # [not aarch64]
     - python -c "import pycolmap; reconstruction = pycolmap.Reconstruction(); x = reconstruction.points3D"       # [not aarch64]
-  requires:                                                                                                      # [not aarch64]
+  requires:   # [not aarch64]
     - pip                                                                                                        # [not aarch64]
 
 about:
