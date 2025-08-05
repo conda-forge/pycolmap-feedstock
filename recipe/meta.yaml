@@ -1,5 +1,5 @@
 {% set name = "pycolmap" %}
-{% set version = "3.12.3" %}
+{% set version = "3.12.4" %}
 
 package:
   name: {{ name }}
@@ -7,13 +7,13 @@ package:
 
 source:
   - url: https://github.com/colmap/colmap/archive/{{ version }}.tar.gz
-    sha256: 1ad69660bd4e15b9cdd2ef407ac11c8e39bdcdc68625c1d142b0d8e80b6b2aa7
+    sha256: 320cb5a411cd0aa713adc05e208ec34067638e776260efd8098271342d408997
     patches:
       - do-not-generate-stubs.patch      # [build_platform != target_platform]
       - disable-parallel-builds.patch    # [win]
 
 build:
-  number: 1
+  number: 0
   script:
     - set CMAKE_BUILD_TYPE=Release       # [win]
     - set CMAKE_ARGS=-G Ninja            # [win]
