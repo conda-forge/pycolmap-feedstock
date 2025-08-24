@@ -35,7 +35,7 @@ gmp:
 libblas:
 - 3.9.* *netlib
 libboost_devel:
-- '1.86'
+- '1.88'
 libcblas:
 - 3.9.* *netlib
 lz4_c:
@@ -61,4 +61,5 @@ vlfeat:
 zip_keys:
 - - c_compiler_version
   - cxx_compiler_version
+  - c_stdlib_version
   - cuda_compiler_version
