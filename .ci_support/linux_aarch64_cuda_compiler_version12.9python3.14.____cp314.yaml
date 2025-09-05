@@ -9,7 +9,7 @@ c_stdlib_version:
 cdt_name:
 - conda
 channel_sources:
-- conda-forge
+- conda-forge,conda-forge/label/python_rc
 channel_targets:
 - conda-forge main
 cuda_compiler:
@@ -49,16 +49,19 @@ pin_run_as_build:
   vlfeat:
     max_pin: x.x.x
 python:
-- 3.9.* *_cpython
+- 3.14.* *_cp314
 qt_main:
 - '5.15'
 sqlite:
 - '3'
 target_platform:
-- linux-64
+- linux-aarch64
 vlfeat:
 - 0.9.21
 zip_keys:
 - - c_compiler_version
   - cxx_compiler_version
+  - c_stdlib_version
   - cuda_compiler_version
+- - python
+  - channel_sources
