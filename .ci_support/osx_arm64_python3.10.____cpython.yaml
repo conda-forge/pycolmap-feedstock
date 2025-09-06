@@ -33,7 +33,7 @@ gmp:
 libblas:
 - 3.9.* *netlib
 libboost_devel:
-- '1.86'
+- '1.88'
 libcblas:
 - 3.9.* *netlib
 llvm_openmp:
@@ -65,3 +65,5 @@ vlfeat:
 zip_keys:
 - - c_compiler_version
   - cxx_compiler_version
+- - python
+  - channel_sources
