@@ -1,8 +1,6 @@
 azure:
   free_disk_space: true
 bot:
-  abi_migration_branches:
-  - 0.4.0
   automerge: true
 build_platform:
   linux_aarch64: linux_64
