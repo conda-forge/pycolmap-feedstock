@@ -17,7 +17,7 @@ build:
   script:
     - set CMAKE_BUILD_TYPE=Release         # [win]
     - set CMAKE_BUILD_PARALLEL_LEVEL=1     # [win]
-    - set CMAKE_ARGS=-G Ninja -T host=x64  # [win]
+    - set CMAKE_ARGS=-G Ninja              # [win]
     - set CMAKE_BUILD_PARALLEL_LEVEL=1     # [win]
     # Kill LTCG/IPO and PDBs to reduce linker memory
     - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF                           # [win]
