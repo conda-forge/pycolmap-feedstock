@@ -13,7 +13,7 @@ source:
       - disable-parallel-builds.patch    # [win]
 
 build:
-  number: 0
+  number: 1
   script:
     - set CMAKE_BUILD_TYPE=Release       # [win]
     - set CMAKE_ARGS=-G Ninja            # [win]
