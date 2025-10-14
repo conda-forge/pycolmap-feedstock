@@ -15,10 +15,16 @@ source:
 build:
   number: 1
   script:
-    - set CMAKE_BUILD_TYPE=Release       # [win]
-    - set CMAKE_ARGS=-G Ninja            # [win]
-    - set CMAKE_BUILD_PARALLEL_LEVEL=1   # [win]
-    - set CUDAFLAGS=--use-local-env      # [win]
+    - set CMAKE_BUILD_TYPE=Release         # [win]
+    - set CMAKE_BUILD_PARALLEL_LEVEL=1     # [win]
+    - set CMAKE_ARGS=-G Ninja -T host=x64  # [win]
+    - set CMAKE_BUILD_PARALLEL_LEVEL=1     # [win]
+    # Kill LTCG/IPO and PDBs to reduce linker memory
+    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF                           # [win]
+    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=None                         # [win]
+    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_EXE_LINKER_FLAGS="/INCREMENTAL:NO /OPT:REF /OPT:ICF"       # [win]
+    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_SHARED_LINKER_FLAGS="/INCREMENTAL:NO /OPT:REF /OPT:ICF"    # [win]
+    - set CUDAFLAGS=--use-local-env        # [win]
     - CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"  # [osx]
     - {{ PYTHON }} -m pip install . -vv --no-build-isolation
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version not in (undefined, "None")]
