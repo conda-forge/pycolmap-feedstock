@@ -17,7 +17,7 @@ flann:
 gflags:
 - '2.2'
 glew:
-- '2.1'
+- '2.2'
 glog:
 - '0.7'
 gmp:
@@ -46,6 +46,3 @@ sqlite:
 - '3'
 target_platform:
 - win-64
-zip_keys:
-- - python
-  - channel_sources
