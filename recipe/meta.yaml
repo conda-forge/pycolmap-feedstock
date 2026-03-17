@@ -30,7 +30,6 @@ build:
     - {{ PYTHON }} -m pip install . -vv --no-build-isolation
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version not in (undefined, "None")]
   string: cpu_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version in (undefined, "None")]
-  skip: true  # [win and cuda_compiler_version == "11.2"]
   # weigh down cpu implementation and give cuda preference
   track_features:
     - pycolmap-cpu  # [cuda_compiler_version in (undefined, "None")]
@@ -84,9 +83,9 @@ requirements:
     - gmp
     - qt-main
     - lz4-c
-    - cuda-cudart-dev {{ cuda_compiler_version }}  # [(cuda_compiler_version or "").startswith("12")]
-    - libcurand-dev                                # [(cuda_compiler_version or "").startswith("12")]
-    - cuda-version {{ cuda_compiler_version }}     # [(cuda_compiler_version or "").startswith("12")]
+    - cuda-cudart-dev {{ cuda_compiler_version }}  # [cuda_compiler_version not in (undefined, "None")]
+    - libcurand-dev                                # [cuda_compiler_version not in (undefined, "None")]
+    - cuda-version {{ cuda_compiler_version }}     # [cuda_compiler_version not in (undefined, "None")]
   run:
     - python
     - numpy
