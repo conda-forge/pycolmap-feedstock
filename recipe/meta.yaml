@@ -10,6 +10,7 @@ source:
     sha256: 04ebfb9a313bddaa3899bc6016004b3d2f05cae3d0e47177896972c1e84ec43c
     patches:
       - disable-parallel-builds.patch    # [win]
+      - bump-min-cmake.patch
 
 build:
   number: 0
