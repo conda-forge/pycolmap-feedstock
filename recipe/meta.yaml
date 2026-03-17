@@ -21,7 +21,7 @@ build:
     - set CMAKE_BUILD_PARALLEL_LEVEL=1     # [win]
     # Kill LTCG/IPO and PDBs to reduce linker memory
     - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF                           # [win]
-    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=None                         # [win]
+    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=""                           # [win]
     - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_EXE_LINKER_FLAGS="/INCREMENTAL:NO /OPT:REF /OPT:ICF"       # [win]
     - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_SHARED_LINKER_FLAGS="/INCREMENTAL:NO /OPT:REF /OPT:ICF"    # [win]
     - set CUDAFLAGS=--use-local-env        # [win]
