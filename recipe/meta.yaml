@@ -9,7 +9,6 @@ source:
   - url: https://github.com/colmap/colmap/archive/{{ version }}.zip
     sha256: 04ebfb9a313bddaa3899bc6016004b3d2f05cae3d0e47177896972c1e84ec43c
     patches:
-      - do-not-generate-stubs.patch      # [build_platform != target_platform]
       - disable-parallel-builds.patch    # [win]
 
 build:
