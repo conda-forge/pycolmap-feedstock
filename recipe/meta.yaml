@@ -1,35 +1,37 @@
 {% set name = "pycolmap" %}
-{% set version = "3.13.0" %}
+{% set version = "4.0.1" %}
 
 package:
   name: {{ name }}
   version: {{ version }}
 
 source:
-  - url: https://github.com/colmap/colmap/archive/{{ version }}.tar.gz
-    sha256: 98a8f8cf6358774be223239a9b034cc9d55bf66c43f54fc6ddea9128a1ee197a
+  - url: https://github.com/colmap/colmap/archive/{{ version }}.zip
+    sha256: 04ebfb9a313bddaa3899bc6016004b3d2f05cae3d0e47177896972c1e84ec43c
     patches:
-      - do-not-generate-stubs.patch      # [build_platform != target_platform]
       - disable-parallel-builds.patch    # [win]
+      - bump-min-cmake.patch
 
 build:
-  number: 1
+  number: 0
   script:
     - set CMAKE_BUILD_TYPE=Release         # [win]
     - set CMAKE_BUILD_PARALLEL_LEVEL=1     # [win]
     - set CMAKE_ARGS=-G Ninja              # [win]
     - set CMAKE_BUILD_PARALLEL_LEVEL=1     # [win]
     # Kill LTCG/IPO and PDBs to reduce linker memory
-    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF                           # [win]
-    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=None                         # [win]
-    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_EXE_LINKER_FLAGS="/INCREMENTAL:NO /OPT:REF /OPT:ICF"       # [win]
-    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_SHARED_LINKER_FLAGS="/INCREMENTAL:NO /OPT:REF /OPT:ICF"    # [win]
+    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF                             # [win]
+    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=""                             # [win]
+    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_EXE_LINKER_FLAGS="/INCREMENTAL:NO /OPT:REF /OPT:ICF"         # [win]
+    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_SHARED_LINKER_FLAGS="/INCREMENTAL:NO /OPT:REF /OPT:ICF"      # [win]
+    - set "FAISS_CMAKE=%LIBRARY_PREFIX%\lib\cmake\faiss\faiss-targets.cmake"                           # [win]
+    - sed -i "s|INTERFACE_LINK_LIBRARIES \".*\"|INTERFACE_LINK_LIBRARIES \"faiss\"|g" "%FAISS_CMAKE%"  # [win]
     - set CUDAFLAGS=--use-local-env        # [win]
     - CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"  # [osx]
+    - export CMAKE_ARGS="${CMAKE_ARGS} -DGENERATE_STUBS=OFF"  # [build_platform != target_platform]
     - {{ PYTHON }} -m pip install . -vv --no-build-isolation
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version not in (undefined, "None")]
   string: cpu_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version in (undefined, "None")]
-  skip: true  # [win and cuda_compiler_version == "11.2"]
   # weigh down cpu implementation and give cuda preference
   track_features:
     - pycolmap-cpu  # [cuda_compiler_version in (undefined, "None")]
@@ -52,6 +54,7 @@ requirements:
     - scikit-build-core                      # [build_platform != target_platform]
     - llvm-openmp                            # [osx]
     - libgomp                                # [linux]
+    - m2-sed                                 # [win]
   host:
     - libgl-devel                            # [linux]
     - pip
@@ -83,8 +86,10 @@ requirements:
     - gmp
     - qt-main
     - lz4-c
-    - cuda-cudart-dev {{ cuda_compiler_version }}  # [(cuda_compiler_version or "").startswith("12")]
-    - libcurand-dev                                # [(cuda_compiler_version or "").startswith("12")]
+    - libfaiss
+    - cuda-cudart-dev {{ cuda_compiler_version }}  # [cuda_compiler_version not in (undefined, "None")]
+    - libcurand-dev                                # [cuda_compiler_version not in (undefined, "None")]
+    - cuda-version {{ cuda_compiler_version }}     # [cuda_compiler_version not in (undefined, "None")]
   run:
     - python
     - numpy
