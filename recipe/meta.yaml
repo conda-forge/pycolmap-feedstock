@@ -83,8 +83,7 @@ requirements:
     - gmp
     - qt-main
     - lz4-c
-    - faiss
-    - faiss-gpu                                    # [cuda_compiler_version not in (undefined, "None")]
+    - libfaiss
     - cuda-cudart-dev {{ cuda_compiler_version }}  # [cuda_compiler_version not in (undefined, "None")]
     - libcurand-dev                                # [cuda_compiler_version not in (undefined, "None")]
     - cuda-version {{ cuda_compiler_version }}     # [cuda_compiler_version not in (undefined, "None")]
