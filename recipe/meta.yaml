@@ -20,10 +20,12 @@ build:
     - set CMAKE_ARGS=-G Ninja              # [win]
     - set CMAKE_BUILD_PARALLEL_LEVEL=1     # [win]
     # Kill LTCG/IPO and PDBs to reduce linker memory
-    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF                           # [win]
-    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=""                           # [win]
-    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_EXE_LINKER_FLAGS="/INCREMENTAL:NO /OPT:REF /OPT:ICF"       # [win]
-    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_SHARED_LINKER_FLAGS="/INCREMENTAL:NO /OPT:REF /OPT:ICF"    # [win]
+    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF                             # [win]
+    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=""                             # [win]
+    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_EXE_LINKER_FLAGS="/INCREMENTAL:NO /OPT:REF /OPT:ICF"         # [win]
+    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_SHARED_LINKER_FLAGS="/INCREMENTAL:NO /OPT:REF /OPT:ICF"      # [win]
+    - set "FAISS_CMAKE=%LIBRARY_PREFIX%\lib\cmake\faiss\faiss-targets.cmake"                           # [win]
+    - sed -i "s|INTERFACE_LINK_LIBRARIES \".*\"|INTERFACE_LINK_LIBRARIES \"faiss\"|g" "%FAISS_CMAKE%"  # [win]
     - set CUDAFLAGS=--use-local-env        # [win]
     - CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"  # [osx]
     - export CMAKE_ARGS="${CMAKE_ARGS} -DGENERATE_STUBS=OFF"  # [build_platform != target_platform]
@@ -52,6 +54,7 @@ requirements:
     - scikit-build-core                      # [build_platform != target_platform]
     - llvm-openmp                            # [osx]
     - libgomp                                # [linux]
+    - m2-sed                                 # [win]
   host:
     - libgl-devel                            # [linux]
     - pip
