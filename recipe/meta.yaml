@@ -1,5 +1,5 @@
 {% set name = "pycolmap" %}
-{% set version = "4.0.1" %}
+{% set version = "4.0.2" %}
 
 package:
   name: {{ name }}
@@ -7,7 +7,7 @@ package:
 
 source:
   - url: https://github.com/colmap/colmap/archive/{{ version }}.zip
-    sha256: 04ebfb9a313bddaa3899bc6016004b3d2f05cae3d0e47177896972c1e84ec43c
+    sha256: f898c361a52aabddc809e594a9bbd4f457fa0e58a53bafce7c717a607dd2687b
     patches:
       - disable-parallel-builds.patch    # [win]
       - bump-min-cmake.patch
