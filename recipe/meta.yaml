@@ -1,5 +1,5 @@
 {% set name = "pycolmap" %}
-{% set version = "4.0.2" %}
+{% set version = "4.0.3" %}
 
 package:
   name: {{ name }}
@@ -7,7 +7,7 @@ package:
 
 source:
   - url: https://github.com/colmap/colmap/archive/{{ version }}.zip
-    sha256: f898c361a52aabddc809e594a9bbd4f457fa0e58a53bafce7c717a607dd2687b
+    sha256: b78119cbc624c67a0b641443ac05e5c5e6eb44b88e91c57aef5a4c2049ca1318
     patches:
       - disable-parallel-builds.patch    # [win]
       - bump-min-cmake.patch
@@ -86,6 +86,7 @@ requirements:
     - gmp
     - qt-main
     - lz4-c
+    - fmt
     - libfaiss
     - cuda-cudart-dev {{ cuda_compiler_version }}  # [cuda_compiler_version not in (undefined, "None")]
     - libcurand-dev                                # [cuda_compiler_version not in (undefined, "None")]
