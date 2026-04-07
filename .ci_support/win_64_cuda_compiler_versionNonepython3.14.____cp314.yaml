@@ -14,6 +14,8 @@ cxx_compiler:
 - vs2022
 flann:
 - 1.9.2
+fmt:
+- '12.1'
 gflags:
 - '2.2'
 glew:
