@@ -22,6 +22,8 @@ cxx_compiler_version:
 - '19'
 flann:
 - 1.9.2
+fmt:
+- '12.1'
 gflags:
 - '2.2'
 glew:
