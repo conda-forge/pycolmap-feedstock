@@ -13,7 +13,7 @@ source:
       - bump-min-cmake.patch
 
 build:
-  number: 0
+  number: 1
   script:
     - set CMAKE_BUILD_TYPE=Release         # [win]
     - set CMAKE_BUILD_PARALLEL_LEVEL=1     # [win]
@@ -70,6 +70,7 @@ requirements:
     - libboost-devel
     - colmap {{ version }} cpu_*                   # [cuda_compiler_version in (undefined, "None")]
     - colmap {{ version }} cuda_*                  # [cuda_compiler_version not in (undefined, "None")]
+    - eigen-abi-devel
     - libblas
     - libcblas
     - cgal-cpp
