@@ -96,6 +96,7 @@ requirements:
   run:
     - python
     - numpy
+    - libopenimageio
     - __cuda >={{ cuda_compiler_version }}         # [cuda_compiler_version not in (undefined, "None")]
 
 # aarch64 failing tests
