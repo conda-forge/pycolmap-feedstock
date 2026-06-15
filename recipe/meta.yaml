@@ -13,7 +13,7 @@ source:
       - bump-min-cmake.patch
 
 build:
-  number: 2
+  number: 3
   script:
     - set CMAKE_BUILD_TYPE=Release         # [win]
     - set CMAKE_BUILD_PARALLEL_LEVEL=1     # [win]
@@ -89,12 +89,14 @@ requirements:
     - lz4-c
     - fmt
     - libfaiss
+    - openimageio
     - cuda-cudart-dev {{ cuda_compiler_version }}  # [cuda_compiler_version not in (undefined, "None")]
     - libcurand-dev                                # [cuda_compiler_version not in (undefined, "None")]
     - cuda-version {{ cuda_compiler_version }}     # [cuda_compiler_version not in (undefined, "None")]
   run:
     - python
     - numpy
+    - libopenimageio
     - __cuda >={{ cuda_compiler_version }}         # [cuda_compiler_version not in (undefined, "None")]
 
 # aarch64 failing tests
