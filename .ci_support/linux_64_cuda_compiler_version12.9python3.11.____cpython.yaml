@@ -27,7 +27,7 @@ flann:
 fmt:
 - '12.1'
 gflags:
-- '2.2'
+- '2.3'
 glew:
 - '2.3'
 glog:
