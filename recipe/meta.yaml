@@ -20,18 +20,18 @@ build:
     - set CMAKE_ARGS=-G Ninja              # [win]
     - set CMAKE_BUILD_PARALLEL_LEVEL=1     # [win]
     # Kill LTCG/IPO and PDBs to reduce linker memory
-    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF                             # [win]
-    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=""                             # [win]
-    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_EXE_LINKER_FLAGS="/INCREMENTAL:NO /OPT:REF /OPT:ICF"         # [win]
-    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_SHARED_LINKER_FLAGS="/INCREMENTAL:NO /OPT:REF /OPT:ICF"      # [win]
-    - set "FAISS_CMAKE=%LIBRARY_PREFIX%\lib\cmake\faiss\faiss-targets.cmake"                           # [win]
-    - sed -i "s|INTERFACE_LINK_LIBRARIES \".*\"|INTERFACE_LINK_LIBRARIES \"faiss\"|g" "%FAISS_CMAKE%"  # [win]
-    - set CUDAFLAGS=--use-local-env        # [win]
-    - CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"  # [osx]
-    - export CMAKE_ARGS="${CMAKE_ARGS} -DGENERATE_STUBS=OFF"  # [build_platform != target_platform]
-    - {{ PYTHON }} -m pip install . -vv --no-build-isolation
+    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF                                      # [win]
+    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=""                                      # [win]
+    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_EXE_LINKER_FLAGS="/INCREMENTAL:NO /OPT:REF /OPT:ICF"                  # [win]
+    - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_SHARED_LINKER_FLAGS="/INCREMENTAL:NO /OPT:REF /OPT:ICF"               # [win]
+    - set "FAISS_CMAKE=%LIBRARY_PREFIX%\lib\cmake\faiss\faiss-targets.cmake"                                    # [win]
+    - sed -i "s|INTERFACE_LINK_LIBRARIES \".*\"|INTERFACE_LINK_LIBRARIES \"faiss\"|g" "%FAISS_CMAKE%"           # [win]
+    - set CUDAFLAGS=--use-local-env                                                                             # [win]
+    - CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"                                                     # [osx]
+    - export CMAKE_ARGS="${CMAKE_ARGS} -DGENERATE_STUBS=OFF"                                                    # [build_platform != target_platform]
+    - {{ PYTHON }} -m pip install . -vv --no-build-isolation --no-deps
   string: cuda{{ cuda_compiler_version | replace('.', '') }}py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version not in (undefined, "None")]
-  string: cpu_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}  # [cuda_compiler_version in (undefined, "None")]
+  string: cpu_py{{ CONDA_PY }}h{{ PKG_HASH }}_{{ PKG_BUILDNUM }}                                                # [cuda_compiler_version in (undefined, "None")]
   # weigh down cpu implementation and give cuda preference
   track_features:
     - pycolmap-cpu  # [cuda_compiler_version in (undefined, "None")]
@@ -41,22 +41,22 @@ requirements:
     - {{ compiler('cxx') }}
     - {{ compiler('c') }}
     - {{ stdlib("c") }}
-    - {{ compiler('cuda') }}                 # [cuda_compiler_version not in (undefined, "None")]
+    - {{ compiler('cuda') }}                       # [cuda_compiler_version not in (undefined, "None")]
     - cmake
-    - make                                   # [unix]
+    - make                                         # [unix]
     - ninja
-    - python                                 # [build_platform != target_platform]
-    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
-    - pybind11                               # [build_platform != target_platform]
-    - pybind11-stubgen                       # [build_platform != target_platform]
-    - numpy                                  # [build_platform != target_platform]
-    - scikit-build                           # [build_platform != target_platform]
-    - scikit-build-core                      # [build_platform != target_platform]
-    - llvm-openmp                            # [osx]
-    - libgomp                                # [linux]
-    - m2-sed                                 # [win]
+    - python                                       # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}           # [build_platform != target_platform]
+    - pybind11                                     # [build_platform != target_platform]
+    - pybind11-stubgen                             # [build_platform != target_platform]
+    - numpy                                        # [build_platform != target_platform]
+    - scikit-build                                 # [build_platform != target_platform]
+    - scikit-build-core                            # [build_platform != target_platform]
+    - llvm-openmp                                  # [osx]
+    - libgomp                                      # [linux]
+    - m2-sed                                       # [win]
   host:
-    - libgl-devel                            # [linux]
+    - libgl-devel                                  # [linux]
     - pip
     - python
     - scikit-build
@@ -102,12 +102,12 @@ requirements:
 # aarch64 failing tests
 # /lib64/libm.so.6: version `GLIBC_2.27' not found
 test:
-  imports:   # [not aarch64]
+  imports:                                                                                                       # [not aarch64]
     - pycolmap                                                                                                   # [not aarch64]
-  commands:   # [not aarch64]
+  commands:                                                                                                      # [not aarch64]
     - pip check                                                                                                  # [not aarch64]
     - python -c "import pycolmap; reconstruction = pycolmap.Reconstruction(); x = reconstruction.points3D"       # [not aarch64]
-  requires:   # [not aarch64]
+  requires:                                                                                                      # [not aarch64]
     - pip                                                                                                        # [not aarch64]
 
 about:
