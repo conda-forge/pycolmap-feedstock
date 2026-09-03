@@ -1,0 +1,153 @@
+# aarch64 failing tests
+# /lib64/libm.so.6: version `GLIBC_2.27' not found
+schema_version: 1
+
+context:
+  name: pycolmap
+  version: "4.2.0"
+
+  cuda: ${{ "enabled" if cuda_compiler_version != "None" else "disabled" }}
+  cuda_build_string: cuda_${{ cuda_compiler_version | version_to_buildstring }}
+  string_prefix: ${{ cuda_build_string if cuda ==  "enabled" else "cpu_" }}
+
+package:
+  name: ${{ name }}
+  version: ${{ version }}
+
+source:
+  - url: https://github.com/colmap/colmap/archive/${{ version }}.zip
+    sha256: c8ed75bb24725977e3dc96603014f43b21470b19b7f23dd7daa0666cb55c23fb
+    patches:
+      - if: win
+        then: disable-parallel-builds.patch
+      - bump-min-cmake.patch
+
+build:
+  number: 0
+  string: ${{ string_prefix }}h${{ hash }}_${{ build_number }}
+  variant:
+    use_keys:
+      # use cuda from the variant config, e.g. to build multiple CUDA variants
+      - ${{ "cuda" if cuda == "enabled" }}
+    # this will down-prioritize the cpu variant versus other variants of the package
+    down_prioritize_variant: ${{ 0 if cuda == "enabled" else 1 }}
+  script:
+    - if: win
+      then:
+        - set CMAKE_BUILD_TYPE=Release
+        - set CMAKE_BUILD_PARALLEL_LEVEL=1
+        - set CMAKE_ARGS=-G Ninja
+        - set CMAKE_BUILD_PARALLEL_LEVEL=1
+        # Kill LTCG/IPO and PDBs to reduce linker memory
+        - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF
+        - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=""
+        - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_EXE_LINKER_FLAGS="/INCREMENTAL:NO /OPT:REF /OPT:ICF"
+        - set CMAKE_ARGS=%CMAKE_ARGS% -DCMAKE_SHARED_LINKER_FLAGS="/INCREMENTAL:NO /OPT:REF /OPT:ICF"
+        - set "FAISS_CMAKE=%LIBRARY_PREFIX%\lib\cmake\faiss\faiss-targets.cmake"
+        - sed -i "s|INTERFACE_LINK_LIBRARIES \".*\"|INTERFACE_LINK_LIBRARIES \"faiss\"|g" "%FAISS_CMAKE%"
+        - set CUDAFLAGS=--use-local-env
+    - if: osx
+      then: CXXFLAGS="${CXXFLAGS} -D_LIBCPP_DISABLE_AVAILABILITY"
+    - if: build_platform != target_platform
+      then: export CMAKE_ARGS="${CMAKE_ARGS} -DGENERATE_STUBS=OFF"
+    - ${{ PYTHON }} -m pip install . -vv --no-build-isolation --no-deps
+
+requirements:
+  build:
+    - ${{ compiler('cxx') }}
+    - ${{ compiler('c') }}
+    - ${{ stdlib("c") }}
+    - if: cuda == "enabled"
+      then: ${{ compiler('cuda') }}
+    - cmake
+    - if: unix
+      then: make
+    - ninja
+    - if: build_platform != target_platform
+      then:
+        - python
+        - cross-python_${{ target_platform }}
+        - pybind11
+        - pybind11-stubgen
+        - numpy
+        - scikit-build
+        - scikit-build-core
+    - if: osx
+      then: llvm-openmp
+    - if: linux
+      then: libgomp
+    - if: win
+      then: m2-sed
+  host:
+    - if: linux
+      then: libgl-devel
+    - pip
+    - python
+    - scikit-build
+    - scikit-build-core
+    - pybind11
+    - pybind11-stubgen
+    - numpy
+    - ruff
+    - black
+    - isort
+    - libboost-devel
+    - if: cuda == "disabled"
+      then: colmap ==${{ version }} cpu_*
+    - if: cuda == "enabled"
+      then: colmap ==${{ version }} cuda_*
+    - eigen-abi-devel
+    - libblas
+    - libcblas
+    - cgal-cpp
+    - sqlite
+    - flann
+    - glog
+    - gflags
+    - flann
+    - freeimage
+    - metis
+    - ceres-solver
+    - glew
+    - if: unix
+      then: vlfeat
+    - gmp
+    - qt-main
+    - lz4-c
+    - fmt
+    - libfaiss
+    - openimageio
+    - if: cuda == "enabled"
+      then:
+        - cuda-cudart-dev ${{ cuda_compiler_version }}.*
+        - libcurand-dev
+        - cuda-version ${{ cuda_compiler_version }}.*
+  run:
+    - python
+    - numpy
+    - libopenimageio
+    - if: cuda == "enabled"
+      then: __cuda >=${{ cuda_compiler_version }}
+
+tests:
+  - python:
+      imports:
+        - pycolmap
+      pip_check: false
+  - requirements:
+      run:
+        - pip
+    script:
+      - pip check
+      - python -c "import pycolmap; reconstruction = pycolmap.Reconstruction(); x = reconstruction.points3D"
+
+about:
+  license: BSD-3-Clause
+  license_file:
+    - COPYING.txt
+  summary: pycolmap exposes to Python most COLMAP reconstruction objects, such as Cameras and Points3D, as well as estimators for absolute and relative poses.
+  homepage: https://colmap.github.io/
+
+extra:
+  recipe-maintainers:
+    - Tobias-Fischer

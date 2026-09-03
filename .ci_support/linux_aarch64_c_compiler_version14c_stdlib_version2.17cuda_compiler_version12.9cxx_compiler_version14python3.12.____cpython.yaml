@@ -13,13 +13,13 @@ channel_targets:
 cuda_compiler:
 - cuda-nvcc
 cuda_compiler_version:
-- None
+- '12.9'
 cxx_compiler:
 - gxx
 cxx_compiler_version:
 - '14'
 docker_image:
-- quay.io/condaforge/linux-anvil-x86_64:alma10
+- quay.io/condaforge/linux-anvil-aarch64:alma10
 eigen_abi_devel:
 - 5.0.1
 flann:
@@ -59,7 +59,7 @@ qt_main:
 sqlite:
 - '3'
 target_platform:
-- linux-64
+- linux-aarch64
 vlfeat:
 - 0.9.21
 zip_keys:
