@@ -13,7 +13,7 @@ channel_targets:
 cuda_compiler:
 - cuda-nvcc
 cuda_compiler_version:
-- '13.0'
+- '13.4'
 cxx_compiler:
 - gxx
 cxx_compiler_version:
@@ -53,7 +53,7 @@ pin_run_as_build:
   vlfeat:
     max_pin: x.x.x
 python:
-- 3.14.* *_cp314
+- 3.13.* *_cp313
 qt_main:
 - '5.15'
 sqlite:
