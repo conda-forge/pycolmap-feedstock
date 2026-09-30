@@ -4,7 +4,7 @@ schema_version: 1
 
 context:
   name: pycolmap
-  version: "4.2.0"
+  version: "4.2.1"
 
   cuda: ${{ "enabled" if cuda_compiler_version != "None" else "disabled" }}
   cuda_build_string: cuda_${{ cuda_compiler_version | version_to_buildstring }}
@@ -16,7 +16,7 @@ package:
 
 source:
   - url: https://github.com/colmap/colmap/archive/${{ version }}.zip
-    sha256: c8ed75bb24725977e3dc96603014f43b21470b19b7f23dd7daa0666cb55c23fb
+    sha256: 62c7fbdd87641581d38c9f4b0a8993daeb243b7585fc95572f68471164efeacc
     patches:
       - if: win
         then: disable-parallel-builds.patch
