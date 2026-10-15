@@ -32,6 +32,8 @@ libboost_devel:
 - '1.90'
 libcblas:
 - 3.9.* *netlib
+libopenimageio:
+- '3.2'
 lz4_c:
 - '1.10'
 metis:
