@@ -116,7 +116,10 @@ requirements:
     - lz4-c
     - fmt
     - libfaiss
-    - openimageio
+    # libopenimageio (not the openimageio metapackage): only it carries
+    # run_exports (libopenimageio >=x.y.z,<x.(y+1)), and only this name is
+    # tracked by the global pinning / migrator.
+    - libopenimageio
     - if: cuda == "enabled"
       then:
         - cuda-cudart-dev ${{ cuda_compiler_version }}.*
@@ -125,7 +128,6 @@ requirements:
   run:
     - python
     - numpy
-    - libopenimageio
     - if: cuda == "enabled"
       then: __cuda >=${{ cuda_compiler_version }}
 
