@@ -13,7 +13,7 @@ channel_targets:
 cuda_compiler:
 - cuda-nvcc
 cuda_compiler_version:
-- '13.0'
+- '13.4'
 cxx_compiler:
 - gxx
 cxx_compiler_version:
@@ -40,6 +40,8 @@ libboost_devel:
 - '1.90'
 libcblas:
 - 3.9.* *netlib
+libopenimageio:
+- '3.2'
 lz4_c:
 - '1.10'
 metis:
@@ -52,6 +54,8 @@ pin_run_as_build:
     max_pin: x.x
   vlfeat:
     max_pin: x.x.x
+pybind11_abi:
+- '11'
 python:
 - 3.11.* *_cpython
 qt_main:

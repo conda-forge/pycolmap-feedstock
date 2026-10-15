@@ -40,6 +40,8 @@ libboost_devel:
 - '1.90'
 libcblas:
 - 3.9.* *netlib
+libopenimageio:
+- '3.2'
 llvm_openmp:
 - '21'
 lz4_c:
@@ -56,6 +58,8 @@ pin_run_as_build:
     max_pin: x.x
   vlfeat:
     max_pin: x.x.x
+pybind11_abi:
+- '11'
 python:
 - 3.12.* *_cpython
 qt_main:
